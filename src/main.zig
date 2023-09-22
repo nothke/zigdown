@@ -25,7 +25,7 @@ pub fn main() !void {
     defer glfw.terminate();
 
     // Create our window
-    const window = glfw.Window.create(640, 480, "Hello, mach-glfw!", null, null, .{}) orelse {
+    const window = glfw.Window.create(1200, 1000, "Hello, mach-glfw!", null, null, .{}) orelse {
         std.log.err("failed to create GLFW window: {?s}", .{glfw.getErrorString()});
         std.process.exit(1);
     };
@@ -60,6 +60,43 @@ pub fn main() !void {
     mesh.create();
     defer mesh.deinit();
 
+    var mesh2 = Mesh.init(alloc);
+
+    try mesh2.vertices.appendSlice(&.{
+        0, 0, 0,
+        1, 0, 0,
+        0, 1, 0,
+        1, 1, 0,
+        0, 0, 1,
+        1, 0, 1,
+        0, 1, 1,
+        1, 1, 1,
+    });
+
+    try mesh2.indices.appendSlice(&.{
+        // front
+        0, 1, 2,
+        2, 3, 0,
+        // right
+        1, 5, 6,
+        6, 2, 1,
+        // back
+        7, 6, 5,
+        5, 4, 7,
+        // left
+        4, 0, 3,
+        3, 7, 4,
+        // bottom
+        4, 5, 1,
+        1, 0, 4,
+        // top
+        3, 2, 6,
+        6, 7, 3,
+    });
+
+    mesh2.create();
+    defer mesh2.deinit();
+
     var shader = Shader{
         .vertSource = @embedFile("vert.glsl"),
         .fragSource = @embedFile("frag.glsl"),
@@ -75,6 +112,7 @@ pub fn main() !void {
 
         shader.bind();
         mesh.bind();
+        mesh2.bind();
 
         glfw.pollEvents();
     }
