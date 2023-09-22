@@ -1,17 +1,23 @@
+const std = @import("std");
 const gl = @import("gl");
+const Allocator = std.mem.Allocator;
 
 pub const Mesh = struct {
-    vertices: [32]f32 = [1]f32{0} ** 32,
-    indices: [32]u32 = [1]u32{0} ** 32,
-
-    vertexCount: isize = 0,
-    indexCount: isize = 0,
+    vertices: std.ArrayList(f32),
+    indices: std.ArrayList(u32),
 
     vao: u32 = undefined,
     vbo: u32 = undefined,
     ibo: u32 = undefined,
 
     const Self = @This();
+
+    pub fn init(allocator: Allocator) Mesh {
+        return .{
+            .vertices = std.ArrayList(f32).init(allocator),
+            .indices = std.ArrayList(u32).init(allocator),
+        };
+    }
 
     pub fn create(self: *Self) void {
         // VAO, VBO, IBO
@@ -28,13 +34,13 @@ pub const Mesh = struct {
         gl.bindVertexArray(vao);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-        gl.bufferData(gl.ARRAY_BUFFER, self.vertexCount * @sizeOf(f32), self.vertices[0..].ptr, gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, @intCast(self.vertices.items.len * @sizeOf(f32)), self.vertices.items[0..].ptr, gl.STATIC_DRAW);
 
         gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * @sizeOf(f32), null);
         gl.enableVertexAttribArray(0);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, self.indexCount * @sizeOf(u32), self.indices[0..].ptr, gl.STATIC_DRAW);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, @intCast(self.indices.items.len * @sizeOf(u32)), self.indices.items[0..].ptr, gl.STATIC_DRAW);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0);
@@ -48,13 +54,16 @@ pub const Mesh = struct {
     pub fn bind(self: Self) void {
         gl.bindVertexArray(self.vao);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.ibo);
-        gl.drawElements(gl.TRIANGLES, @intCast(self.indexCount), gl.UNSIGNED_INT, null);
+        gl.drawElements(gl.TRIANGLES, @intCast(self.indices.items.len), gl.UNSIGNED_INT, null);
     }
 
     pub fn deinit(self: Self) void {
         gl.deleteVertexArrays(1, &self.vao);
         gl.deleteBuffers(1, &self.vbo);
         gl.deleteBuffers(1, &self.ibo);
+
+        self.indices.deinit();
+        self.vertices.deinit();
     }
 };
 

@@ -48,12 +48,14 @@ pub fn main() !void {
         0, 1, 2,
     };
 
-    var mesh = Mesh{};
-    @memcpy(mesh.vertices[0..vertices.len], vertices[0..]);
-    mesh.vertexCount = vertices.len;
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    const alloc = gpa.allocator();
 
-    @memcpy(mesh.indices[0..indices.len], indices[0..]);
-    mesh.indexCount = indices.len;
+    var mesh = Mesh.init(alloc);
+
+    try mesh.vertices.appendSlice(vertices[0..]);
+    try mesh.indices.appendSlice(indices[0..]);
 
     mesh.create();
     defer mesh.deinit();
