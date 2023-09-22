@@ -1,6 +1,60 @@
 const std = @import("std");
 const gl = @import("gl");
-const Allocator = std.mem.Allocator;
+const glfw = @import("mach-glfw");
+
+pub const Engine = struct {
+    window: ?glfw.Window = null,
+
+    const Self = @This();
+
+    fn glGetProcAddress(p: glfw.GLProc, proc: [:0]const u8) ?gl.FunctionPointer {
+        _ = p;
+        return glfw.getProcAddress(proc);
+    }
+
+    /// Default GLFW error handling callback
+    fn errorCallback(error_code: glfw.ErrorCode, description: [:0]const u8) void {
+        std.log.err("glfw: {}: {s}\n", .{ error_code, description });
+    }
+
+    pub fn init(self: *Self) !void {
+        glfw.setErrorCallback(errorCallback);
+        if (!glfw.init(.{})) {
+            std.log.err("failed to initialize GLFW: {?s}", .{glfw.getErrorString()});
+            std.process.exit(1);
+        }
+
+        // Create our window
+        self.window = glfw.Window.create(1200, 1000, "Hello, mach-glfw!", null, null, .{}) orelse {
+            std.log.err("failed to create GLFW window: {?s}", .{glfw.getErrorString()});
+            std.process.exit(1);
+        };
+
+        glfw.makeContextCurrent(self.window);
+
+        const proc: glfw.GLProc = undefined;
+        try gl.load(proc, glGetProcAddress);
+    }
+
+    pub fn deinit(self: Self) void {
+        if (self.window) |window| {
+            window.destroy();
+        }
+
+        glfw.terminate();
+    }
+
+    pub fn isRunning(self: Self) bool {
+        self.window.?.swapBuffers();
+
+        glfw.pollEvents();
+
+        gl.clearColor(1, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        return !self.window.?.shouldClose();
+    }
+};
 
 pub const Mesh = struct {
     vertices: std.ArrayList(f32),
@@ -12,7 +66,7 @@ pub const Mesh = struct {
 
     const Self = @This();
 
-    pub fn init(allocator: Allocator) Mesh {
+    pub fn init(allocator: std.mem.Allocator) Mesh {
         return .{
             .vertices = std.ArrayList(f32).init(allocator),
             .indices = std.ArrayList(u32).init(allocator),
