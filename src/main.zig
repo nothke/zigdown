@@ -32,17 +32,28 @@ pub fn main() !void {
     const proc: glfw.GLProc = undefined;
     try gl.load(proc, glGetProcAddress);
 
+    // Data
+
     const vertices = [_]f32{
         -0.5, -0.5, 0,
         0.5,  -0.5, 0,
         0,    0.5,  0,
     };
 
+    const indices = [_]u32{
+        0, 1, 2,
+    };
+
+    // VAO, VBO, IBO
+
     var vao: u32 = undefined;
     gl.genVertexArrays(1, &vao);
 
     var vbo: u32 = undefined;
     gl.genBuffers(1, &vbo);
+
+    var ibo: u32 = undefined;
+    gl.genBuffers(1, &ibo);
 
     gl.bindVertexArray(vao);
 
@@ -52,7 +63,11 @@ pub fn main() !void {
     gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * @sizeOf(f32), null);
     gl.enableVertexAttribArray(0);
 
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices.len * @sizeOf(u32), indices[0..].ptr, gl.STATIC_DRAW);
+
     gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0);
     gl.bindVertexArray(0);
 
     // Shader
@@ -84,7 +99,8 @@ pub fn main() !void {
 
         gl.useProgram(shader);
         gl.bindVertexArray(vao);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+        gl.drawElements(gl.TRIANGLES, indices.len, gl.UNSIGNED_INT, null);
 
         glfw.pollEvents();
     }
