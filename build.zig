@@ -19,6 +19,12 @@ pub fn build(b: *std.Build) void {
     exe.addModule("mach-glfw", glfw_dep.module("mach-glfw"));
     @import("mach_glfw").link(glfw_dep.builder, exe);
 
+    const mach_dep = b.dependency("mach", .{
+        .target = exe.target,
+        .optimize = exe.optimize,
+    });
+    exe.addModule("mach", @import("mach").module(mach_dep.builder, optimize, target));
+
     exe.addModule("gl", b.createModule(.{
         .source_file = .{ .path = "libs/gl41.zig" },
     }));

@@ -7,6 +7,8 @@ const Engine = _engine.Engine;
 const Mesh = _engine.Mesh;
 const Shader = _engine.Shader;
 
+const math = @import("mach").math;
+
 pub fn main() !void {
     var engine = Engine{};
     try engine.init();
@@ -79,6 +81,9 @@ pub fn main() !void {
     };
     shader.compile();
     defer shader.deinit();
+
+    var position = math.vec3(0, 0, 0);
+    _ = position;
 
     while (engine.isRunning()) {
         shader.bind();
