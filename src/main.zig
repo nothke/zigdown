@@ -12,6 +12,58 @@ fn errorCallback(error_code: glfw.ErrorCode, description: [:0]const u8) void {
     std.log.err("glfw: {}: {s}\n", .{ error_code, description });
 }
 
+const Mesh = struct {
+    vertices: [32]f32 = [1]f32{0} ** 32,
+    indices: [32]u32 = [1]u32{0} ** 32,
+
+    vertexCount: isize = 0,
+    indexCount: isize = 0,
+
+    vao: u32 = undefined,
+    vbo: u32 = undefined,
+    ibo: u32 = undefined,
+
+    const Self = @This();
+
+    fn create(self: *Self) void {
+        // VAO, VBO, IBO
+
+        var vao: u32 = undefined;
+        gl.genVertexArrays(1, &vao);
+
+        var vbo: u32 = undefined;
+        gl.genBuffers(1, &vbo);
+
+        var ibo: u32 = undefined;
+        gl.genBuffers(1, &ibo);
+
+        gl.bindVertexArray(vao);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, self.vertexCount * @sizeOf(f32), self.vertices[0..].ptr, gl.STATIC_DRAW);
+
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * @sizeOf(f32), null);
+        gl.enableVertexAttribArray(0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, self.indexCount * @sizeOf(u32), self.indices[0..].ptr, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0);
+        gl.bindVertexArray(0);
+
+        self.vao = vao;
+        self.vbo = vbo;
+        self.ibo = ibo;
+    }
+
+    fn bind(self: Self) void {
+        gl.bindVertexArray(self.vao);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, self.ibo);
+        gl.drawElements(gl.TRIANGLES, @intCast(self.indexCount), gl.UNSIGNED_INT, null);
+    }
+};
+
 pub fn main() !void {
     glfw.setErrorCallback(errorCallback);
     if (!glfw.init(.{})) {
@@ -44,31 +96,15 @@ pub fn main() !void {
         0, 1, 2,
     };
 
-    // VAO, VBO, IBO
+    var mesh = Mesh{};
+    //mesh.vertices = std.mem.copy(f32, , );
+    @memcpy(mesh.vertices[0..vertices.len], vertices[0..]);
+    mesh.vertexCount = vertices.len;
 
-    var vao: u32 = undefined;
-    gl.genVertexArrays(1, &vao);
+    @memcpy(mesh.indices[0..indices.len], indices[0..]);
+    mesh.indexCount = indices.len;
 
-    var vbo: u32 = undefined;
-    gl.genBuffers(1, &vbo);
-
-    var ibo: u32 = undefined;
-    gl.genBuffers(1, &ibo);
-
-    gl.bindVertexArray(vao);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices.len * @sizeOf(f32), vertices[0..].ptr, gl.STATIC_DRAW);
-
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 3 * @sizeOf(f32), null);
-    gl.enableVertexAttribArray(0);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices.len * @sizeOf(u32), indices[0..].ptr, gl.STATIC_DRAW);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, 0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0);
-    gl.bindVertexArray(0);
+    mesh.create();
 
     // Shader
 
@@ -98,9 +134,7 @@ pub fn main() !void {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         gl.useProgram(shader);
-        gl.bindVertexArray(vao);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-        gl.drawElements(gl.TRIANGLES, indices.len, gl.UNSIGNED_INT, null);
+        mesh.bind();
 
         glfw.pollEvents();
     }
