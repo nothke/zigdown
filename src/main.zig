@@ -55,12 +55,34 @@ pub fn main() !void {
     gl.bindBuffer(gl.ARRAY_BUFFER, 0);
     gl.bindVertexArray(0);
 
+    // Shader
+
+    const vertShaderSource: []const u8 = @embedFile("vert.glsl");
+    const fragShaderSource: []const u8 = @embedFile("frag.glsl");
+
+    var vertShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertShader, 1, &vertShaderSource.ptr, null);
+    gl.compileShader(vertShader);
+
+    var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragShader, 1, &fragShaderSource.ptr, null);
+    gl.compileShader(fragShader);
+
+    var shader = gl.createProgram();
+    gl.attachShader(shader, vertShader);
+    gl.attachShader(shader, fragShader);
+    gl.linkProgram(shader);
+
+    gl.deleteShader(vertShader);
+    gl.deleteShader(fragShader);
+
     while (!window.shouldClose()) {
         window.swapBuffers();
 
         gl.clearColor(1, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
+        gl.useProgram(shader);
         gl.bindVertexArray(vao);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
 
