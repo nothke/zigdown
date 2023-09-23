@@ -36,6 +36,8 @@ pub const Engine = struct {
 
         const proc: glfw.GLProc = undefined;
         try gl.load(proc, glGetProcAddress);
+
+        self.camera.updateProjectionMatrix();
     }
 
     pub fn deinit(self: Self) void {
@@ -56,11 +58,29 @@ pub const Engine = struct {
 
         return !self.window.?.shouldClose();
     }
+
+    pub fn keyPressed(self: Self, key: glfw.Key) bool {
+        return self.window.?.getKey(key) == glfw.Action.press;
+    }
 };
 
 pub const Camera = struct {
     projectionMatrix: math.Mat4x4 = math.Mat4x4.ident,
     viewMatrix: math.Mat4x4 = math.Mat4x4.ident,
+
+    nearPlane: f32 = -1 + 0.1,
+    farPlane: f32 = 1000,
+    fov: f32 = 75,
+    aspectRatio: f32 = 1,
+
+    pub fn updateProjectionMatrix(self: *Camera) void {
+        self.projectionMatrix = math.Mat4x4.perspective(
+            math.degreesToRadians(f32, self.fov),
+            self.aspectRatio,
+            self.nearPlane,
+            self.farPlane,
+        );
+    }
 };
 
 pub const Mesh = struct {

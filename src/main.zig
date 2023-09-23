@@ -14,10 +14,6 @@ pub fn main() !void {
     try engine.init();
     defer engine.deinit();
 
-    engine.camera.projectionMatrix = math.Mat4x4.perspective(math.degreesToRadians(f32, 90), 1, -1, 10000);
-    const camOffset = math.Mat4x4.translate(math.vec3(5, 0, 10));
-    engine.camera.viewMatrix = math.Mat4x4.ident.mul(&camOffset);
-
     // Data
 
     const vertices = [_]f32{
@@ -90,10 +86,36 @@ pub fn main() !void {
     _ = position;
 
     var motion = math.vec3(0, 0, 0);
+    var camOffset = math.vec3(4, 0, 10);
 
     while (engine.isRunning()) {
-        shader.bind();
+        const speed = 0.01;
+
+        if (engine.keyPressed(.w)) {
+            camOffset.v[2] -= speed;
+        } else if (engine.keyPressed(.s)) {
+            camOffset.v[2] += speed;
+        }
+
+        if (engine.keyPressed(.a)) {
+            camOffset.v[0] += speed;
+        } else if (engine.keyPressed(.d)) {
+            camOffset.v[0] -= speed;
+        }
+
+        if (engine.keyPressed(.c)) {
+            engine.camera.nearPlane += 0.01;
+            engine.camera.updateProjectionMatrix();
+        } else if (engine.keyPressed(.x)) {
+            engine.camera.nearPlane -= 0.01;
+            engine.camera.updateProjectionMatrix();
+        }
+
+        const camOffsetMatrix = math.Mat4x4.translate(camOffset);
+        engine.camera.viewMatrix = math.Mat4x4.ident.mul(&camOffsetMatrix);
+
         //Shader.setMatrix(0, engine.camera.projectionMatrix);
+        shader.bind();
         motion.v[0] = @floatCast(@sin(glfw.getTime()));
         Shader.setVec3(0, motion);
         Shader.setMatrix(1, engine.camera.projectionMatrix);
