@@ -14,7 +14,7 @@ pub fn main() !void {
     try engine.init();
     defer engine.deinit();
 
-    engine.camera.projectionMatrix = math.Mat4x4.ortho(-5, 5, -5, 5, -100, 10000);
+    engine.camera.projectionMatrix = math.Mat4x4.perspective(math.degreesToRadians(f32, 90), 1, -100, 10000);
 
     // Data
 
