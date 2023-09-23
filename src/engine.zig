@@ -60,6 +60,7 @@ pub const Engine = struct {
 
 pub const Camera = struct {
     projectionMatrix: math.Mat4x4 = math.Mat4x4.ident,
+    viewMatrix: math.Mat4x4 = math.Mat4x4.ident,
 };
 
 pub const Mesh = struct {

@@ -14,7 +14,9 @@ pub fn main() !void {
     try engine.init();
     defer engine.deinit();
 
-    engine.camera.projectionMatrix = math.Mat4x4.perspective(math.degreesToRadians(f32, 90), 1, -100, 10000);
+    engine.camera.projectionMatrix = math.Mat4x4.perspective(math.degreesToRadians(f32, 90), 1, -1, 10000);
+    const camOffset = math.Mat4x4.translate(math.vec3(5, 0, 10));
+    engine.camera.viewMatrix = math.Mat4x4.ident.mul(&camOffset);
 
     // Data
 
@@ -95,6 +97,7 @@ pub fn main() !void {
         motion.v[0] = @floatCast(@sin(glfw.getTime()));
         Shader.setVec3(0, motion);
         Shader.setMatrix(1, engine.camera.projectionMatrix);
+        Shader.setMatrix(2, engine.camera.viewMatrix);
 
         mesh.bind();
         mesh2.bind();
