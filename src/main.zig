@@ -14,6 +14,8 @@ pub fn main() !void {
     try engine.init();
     defer engine.deinit();
 
+    engine.camera.projectionMatrix = math.Mat4x4.ortho(-5, 5, -5, 5, -100, 10000);
+
     // Data
 
     const vertices = [_]f32{
@@ -85,8 +87,15 @@ pub fn main() !void {
     var position = math.vec3(0, 0, 0);
     _ = position;
 
+    var motion = math.vec3(0, 0, 0);
+
     while (engine.isRunning()) {
         shader.bind();
+        //Shader.setMatrix(0, engine.camera.projectionMatrix);
+        motion.v[0] = @floatCast(@sin(glfw.getTime()));
+        Shader.setVec3(0, motion);
+        Shader.setMatrix(1, engine.camera.projectionMatrix);
+
         mesh.bind();
         mesh2.bind();
     }
