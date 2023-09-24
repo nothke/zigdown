@@ -61,7 +61,7 @@ pub fn main() !void {
     //     6, 7, 3,
     // });
 
-    try Shapes.sphere(&mesh2, 8, 8, 1);
+    try Shapes.sphere(&mesh2, 64, 32, 1);
 
     try mesh2.create();
     defer mesh2.deinit();
@@ -76,27 +76,39 @@ pub fn main() !void {
     var motion = math.vec3(0, 0, 0);
     var camOffset = math.vec3(4, 0, 10);
 
+    var wireframe = false;
+
     while (engine.isRunning()) {
         const speed = 0.001;
 
-        if (engine.keyPressed(.w)) {
+        if (engine.input.keyPressed(.w)) {
             camOffset.v[2] -= speed;
-        } else if (engine.keyPressed(.s)) {
+        } else if (engine.input.keyPressed(.s)) {
             camOffset.v[2] += speed;
         }
 
-        if (engine.keyPressed(.a)) {
+        if (engine.input.keyPressed(.a)) {
             camOffset.v[0] += speed;
-        } else if (engine.keyPressed(.d)) {
+        } else if (engine.input.keyPressed(.d)) {
             camOffset.v[0] -= speed;
         }
 
-        if (engine.keyPressed(.c)) {
+        if (engine.input.keyPressed(.c)) {
             engine.camera.nearPlane += 0.01;
             engine.camera.updateProjectionMatrix();
-        } else if (engine.keyPressed(.x)) {
+        } else if (engine.input.keyPressed(.x)) {
             engine.camera.nearPlane -= 0.01;
             engine.camera.updateProjectionMatrix();
+        }
+
+        if (engine.input.keyDown(.q)) {
+            wireframe = !wireframe;
+
+            if (wireframe) {
+                gl.polygonMode(gl.FRONT_AND_BACK, gl.LINE);
+            } else {
+                gl.polygonMode(gl.FRONT, gl.FILL);
+            }
         }
 
         const camOffsetMatrix = math.Mat4x4.translate(camOffset);
