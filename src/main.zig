@@ -81,7 +81,7 @@ pub fn main() !void {
         .vertSource = @embedFile("vert.glsl"),
         .fragSource = @embedFile("frag.glsl"),
     };
-    shader.compile();
+    try shader.compile();
     defer shader.deinit();
 
     var motion = math.vec3(0, 0, 0);
@@ -120,9 +120,8 @@ pub fn main() !void {
         motion.v[1] = @floatCast(@cos(glfw.getTime()));
 
         Shader.setUniform(0, motion);
-        try shader.setUniformByName("_P", engine.camera.projectionMatrix);
-        try shader.setUniformByName("_V", engine.camera.viewMatrix);
-        try shader.setUniformByName("somethingsomething", motion);
+        Shader.setUniform(1, engine.camera.projectionMatrix);
+        Shader.setUniform(2, engine.camera.viewMatrix);
 
         mesh.bind();
         mesh2.bind();

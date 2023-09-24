@@ -168,16 +168,41 @@ pub const Shader = struct {
 
     const Self = @This();
 
-    const Error = error{InvalidUniformName};
+    const Error = error{
+        InvalidUniformName,
+        ShaderCompilationFailed,
+    };
 
-    pub fn compile(self: *Self) void {
+    fn logShaderError(shader: u32) !void {
+        var isCompiled: i32 = 0;
+        gl.getShaderiv(shader, gl.COMPILE_STATUS, &isCompiled);
+
+        if (isCompiled == gl.FALSE) {
+            var maxLength: i32 = 0;
+            gl.getShaderiv(shader, gl.INFO_LOG_LENGTH, &maxLength);
+
+            const errorLogSize: usize = 512;
+            var errorLog = [1:0]u8{0} ** errorLogSize;
+            gl.getShaderInfoLog(shader, errorLogSize, &maxLength, &errorLog);
+
+            gl.deleteShader(shader);
+
+            std.log.err("\nShader compilation failed:\n{s}", .{errorLog[0..@intCast(maxLength)]});
+
+            return Error.ShaderCompilationFailed;
+        }
+    }
+
+    pub fn compile(self: *Self) !void {
         var vertShader = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vertShader, 1, &self.vertSource.ptr, null);
         gl.compileShader(vertShader);
+        try logShaderError(vertShader);
 
         var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
         gl.shaderSource(fragShader, 1, &self.fragSource.ptr, null);
         gl.compileShader(fragShader);
+        try logShaderError(fragShader);
 
         self.program = gl.createProgram();
         gl.attachShader(self.program, vertShader);
