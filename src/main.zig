@@ -7,6 +7,7 @@ const Engine = _engine.Engine;
 const Mesh = _engine.Mesh;
 const Shader = _engine.Shader;
 const Vertex = _engine.Vertex;
+const Object = _engine.Object;
 
 const math = @import("mach").math;
 
@@ -73,6 +74,11 @@ pub fn main() !void {
     try shader.compile();
     defer shader.deinit();
 
+    var sphereGO = Object{
+        .mesh = &mesh2,
+        .shader = &shader,
+    };
+
     var motion = math.vec3(0, 0, 0);
     var camOffset = math.vec3(4, 0, 10);
 
@@ -124,6 +130,6 @@ pub fn main() !void {
         Shader.setUniform(1, engine.camera.projectionMatrix);
         Shader.setUniform(2, engine.camera.viewMatrix);
 
-        mesh2.bind();
+        sphereGO.render();
     }
 }
