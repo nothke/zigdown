@@ -15,7 +15,11 @@ const Shapes = @import("shapes.zig");
 
 pub fn main() !void {
     var engine = Engine{};
-    try engine.init(.{ .height = 1024, .width = 1900 });
+    try engine.init(.{
+        .height = 1024,
+        .width = 1900,
+        .fullscreen = false,
+    });
     defer engine.deinit();
 
     // Data
@@ -26,46 +30,11 @@ pub fn main() !void {
 
     // Cube
 
-    var mesh2 = Mesh.init(alloc);
+    var sphereMesh = Mesh.init(alloc);
+    try Shapes.sphere(&sphereMesh, 64, 32, 1);
 
-    // try mesh2.vertices.appendSlice(&.{
-    //     // front
-    //     Vertex{ .position = math.vec3(-1.0, -1.0, 1.0) },
-    //     Vertex{ .position = math.vec3(1.0, -1.0, 1.0) },
-    //     Vertex{ .position = math.vec3(1.0, 1.0, 1.0) },
-    //     Vertex{ .position = math.vec3(-1.0, 1.0, 1.0) },
-    //     // back
-    //     Vertex{ .position = math.vec3(-1.0, -1.0, -1.0) },
-    //     Vertex{ .position = math.vec3(1.0, -1.0, -1.0) },
-    //     Vertex{ .position = math.vec3(1.0, 1.0, -1.0) },
-    //     Vertex{ .position = math.vec3(-1.0, 1.0, -1.0) },
-    // });
-
-    // try mesh2.indices.appendSlice(&.{
-    //     // front
-    //     0, 1, 2,
-    //     2, 3, 0,
-    //     // right
-    //     1, 5, 6,
-    //     6, 2, 1,
-    //     // back
-    //     7, 6, 5,
-    //     5, 4, 7,
-    //     // left
-    //     4, 0, 3,
-    //     3, 7, 4,
-    //     // bottom
-    //     4, 5, 1,
-    //     1, 0, 4,
-    //     // top
-    //     3, 2, 6,
-    //     6, 7, 3,
-    // });
-
-    try Shapes.sphere(&mesh2, 64, 32, 1);
-
-    try mesh2.create();
-    defer mesh2.deinit();
+    try sphereMesh.create();
+    defer sphereMesh.deinit();
 
     var shader = Shader{
         .vertSource = @embedFile("vert.glsl"),
@@ -80,12 +49,12 @@ pub fn main() !void {
     var wireframe = false;
 
     engine.createScene();
-    var sphereGO = try engine.scene.?.addObject(&mesh2, &shader);
-    var sphereGO2 = try engine.scene.?.addObject(&mesh2, &shader);
+    var sphereGO = try engine.scene.?.addObject(&sphereMesh, &shader);
+    var sphereGO2 = try engine.scene.?.addObject(&sphereMesh, &shader);
 
     for (0..200) |i| {
         _ = i;
-        _ = try engine.scene.?.addObject(&mesh2, &shader);
+        _ = try engine.scene.?.addObject(&sphereMesh, &shader);
     }
 
     var pcg = std.rand.Pcg.init(345);
@@ -135,8 +104,8 @@ pub fn main() !void {
         var modelMatrix: math.Mat4x4 = math.Mat4x4.ident.mul(&math.Mat4x4.translate(motion));
 
         //Shader.setUniform(0, motion);
-        Shader.setUniform(1, engine.camera.projectionMatrix);
-        Shader.setUniform(2, engine.camera.viewMatrix);
+        try shader.setUniformByName("_P", engine.camera.projectionMatrix);
+        try shader.setUniformByName("_V", engine.camera.viewMatrix);
 
         sphereGO.transform.local2world = modelMatrix;
         sphereGO2.transform.local2world = modelMatrix.mul(&math.Mat4x4.translate(math.vec3(5, 2, 0)));
