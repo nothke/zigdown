@@ -74,20 +74,14 @@ pub fn main() !void {
     try shader.compile();
     defer shader.deinit();
 
-    var sphereGO = Object{
-        .mesh = &mesh2,
-        .shader = &shader,
-    };
-
-    var sphereGO2 = Object{
-        .mesh = &mesh2,
-        .shader = &shader,
-    };
-
     var motion = math.vec3(0, 0, 0);
     var camOffset = math.vec3(4, 0, 10);
 
     var wireframe = false;
+
+    engine.createScene();
+    var sphereGO = try engine.scene.?.addObject(&mesh2, &shader);
+    var sphereGO2 = try engine.scene.?.addObject(&mesh2, &shader);
 
     while (engine.isRunning()) {
         const speed = 0.001;
@@ -139,7 +133,9 @@ pub fn main() !void {
 
         sphereGO.transform.local2world = modelMatrix;
         sphereGO2.transform.local2world = modelMatrix.mul(&math.Mat4x4.translate(math.vec3(5, 2, 0)));
-        try sphereGO.render();
-        try sphereGO2.render();
+
+        if (engine.scene) |scene| {
+            try scene.render();
+        }
     }
 }
