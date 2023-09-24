@@ -6,6 +6,7 @@ const _engine = @import("engine.zig");
 const Engine = _engine.Engine;
 const Mesh = _engine.Mesh;
 const Shader = _engine.Shader;
+const Vertex = _engine.Vertex;
 
 const math = @import("mach").math;
 
@@ -16,41 +17,25 @@ pub fn main() !void {
 
     // Data
 
-    const vertices = [_]f32{
-        -0.5, -0.5, 0,
-        0.5,  -0.5, 0,
-        0,    0.5,  0,
-    };
-
-    const indices = [_]u32{
-        0, 1, 2,
-    };
-
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
     const alloc = gpa.allocator();
 
-    var mesh = Mesh.init(alloc);
-
-    try mesh.vertices.appendSlice(vertices[0..]);
-    try mesh.indices.appendSlice(indices[0..]);
-
-    try mesh.create();
-    defer mesh.deinit();
+    // Cube
 
     var mesh2 = Mesh.init(alloc);
 
     try mesh2.vertices.appendSlice(&.{
         // front
-        -1.0, -1.0, 1.0,
-        1.0,  -1.0, 1.0,
-        1.0,  1.0,  1.0,
-        -1.0, 1.0,  1.0,
+        Vertex{ .position = math.vec3(-1.0, -1.0, 1.0) },
+        Vertex{ .position = math.vec3(1.0, -1.0, 1.0) },
+        Vertex{ .position = math.vec3(1.0, 1.0, 1.0) },
+        Vertex{ .position = math.vec3(-1.0, 1.0, 1.0) },
         // back
-        -1.0, -1.0, -1.0,
-        1.0,  -1.0, -1.0,
-        1.0,  1.0,  -1.0,
-        -1.0, 1.0,  -1.0,
+        Vertex{ .position = math.vec3(-1.0, -1.0, -1.0) },
+        Vertex{ .position = math.vec3(1.0, -1.0, -1.0) },
+        Vertex{ .position = math.vec3(1.0, 1.0, -1.0) },
+        Vertex{ .position = math.vec3(-1.0, 1.0, -1.0) },
     });
 
     try mesh2.indices.appendSlice(&.{
@@ -123,7 +108,6 @@ pub fn main() !void {
         Shader.setUniform(1, engine.camera.projectionMatrix);
         Shader.setUniform(2, engine.camera.viewMatrix);
 
-        mesh.bind();
         mesh2.bind();
     }
 }
