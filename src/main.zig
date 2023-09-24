@@ -10,6 +10,8 @@ const Vertex = _engine.Vertex;
 
 const math = @import("mach").math;
 
+const Shapes = @import("shapes.zig");
+
 pub fn main() !void {
     var engine = Engine{};
     try engine.init(.{});
@@ -25,39 +27,41 @@ pub fn main() !void {
 
     var mesh2 = Mesh.init(alloc);
 
-    try mesh2.vertices.appendSlice(&.{
-        // front
-        Vertex{ .position = math.vec3(-1.0, -1.0, 1.0) },
-        Vertex{ .position = math.vec3(1.0, -1.0, 1.0) },
-        Vertex{ .position = math.vec3(1.0, 1.0, 1.0) },
-        Vertex{ .position = math.vec3(-1.0, 1.0, 1.0) },
-        // back
-        Vertex{ .position = math.vec3(-1.0, -1.0, -1.0) },
-        Vertex{ .position = math.vec3(1.0, -1.0, -1.0) },
-        Vertex{ .position = math.vec3(1.0, 1.0, -1.0) },
-        Vertex{ .position = math.vec3(-1.0, 1.0, -1.0) },
-    });
+    // try mesh2.vertices.appendSlice(&.{
+    //     // front
+    //     Vertex{ .position = math.vec3(-1.0, -1.0, 1.0) },
+    //     Vertex{ .position = math.vec3(1.0, -1.0, 1.0) },
+    //     Vertex{ .position = math.vec3(1.0, 1.0, 1.0) },
+    //     Vertex{ .position = math.vec3(-1.0, 1.0, 1.0) },
+    //     // back
+    //     Vertex{ .position = math.vec3(-1.0, -1.0, -1.0) },
+    //     Vertex{ .position = math.vec3(1.0, -1.0, -1.0) },
+    //     Vertex{ .position = math.vec3(1.0, 1.0, -1.0) },
+    //     Vertex{ .position = math.vec3(-1.0, 1.0, -1.0) },
+    // });
 
-    try mesh2.indices.appendSlice(&.{
-        // front
-        0, 1, 2,
-        2, 3, 0,
-        // right
-        1, 5, 6,
-        6, 2, 1,
-        // back
-        7, 6, 5,
-        5, 4, 7,
-        // left
-        4, 0, 3,
-        3, 7, 4,
-        // bottom
-        4, 5, 1,
-        1, 0, 4,
-        // top
-        3, 2, 6,
-        6, 7, 3,
-    });
+    // try mesh2.indices.appendSlice(&.{
+    //     // front
+    //     0, 1, 2,
+    //     2, 3, 0,
+    //     // right
+    //     1, 5, 6,
+    //     6, 2, 1,
+    //     // back
+    //     7, 6, 5,
+    //     5, 4, 7,
+    //     // left
+    //     4, 0, 3,
+    //     3, 7, 4,
+    //     // bottom
+    //     4, 5, 1,
+    //     1, 0, 4,
+    //     // top
+    //     3, 2, 6,
+    //     6, 7, 3,
+    // });
+
+    try Shapes.sphere(&mesh2, 8, 8, 1);
 
     try mesh2.create();
     defer mesh2.deinit();
