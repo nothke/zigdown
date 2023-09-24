@@ -11,7 +11,7 @@ const math = @import("mach").math;
 
 pub fn main() !void {
     var engine = Engine{};
-    try engine.init();
+    try engine.init(.{});
     defer engine.deinit();
 
     // Data
@@ -83,9 +83,6 @@ pub fn main() !void {
     };
     shader.compile();
     defer shader.deinit();
-
-    var position = math.vec3(0, 0, 0);
-    _ = position;
 
     var motion = math.vec3(0, 0, 0);
     var camOffset = math.vec3(4, 0, 10);

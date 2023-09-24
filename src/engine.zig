@@ -3,6 +3,13 @@ const gl = @import("gl");
 const glfw = @import("mach-glfw");
 const math = @import("mach").math;
 
+pub const WindowProps = struct {
+    width: u32 = 800,
+    height: u32 = 600,
+    title: [:0]const u8 = "zigdown!",
+    vsync: bool = true,
+};
+
 pub const Engine = struct {
     window: ?glfw.Window = null,
     camera: Camera = .{},
@@ -19,7 +26,7 @@ pub const Engine = struct {
         std.log.err("glfw: {}: {s}\n", .{ error_code, description });
     }
 
-    pub fn init(self: *Self) !void {
+    pub fn init(self: *Self, windowProps: WindowProps) !void {
         glfw.setErrorCallback(errorCallback);
         if (!glfw.init(.{})) {
             std.log.err("failed to initialize GLFW: {?s}", .{glfw.getErrorString()});
@@ -27,7 +34,7 @@ pub const Engine = struct {
         }
 
         // Create our window
-        self.window = glfw.Window.create(400, 300, "zigdown!", null, null, .{}) orelse {
+        self.window = glfw.Window.create(windowProps.width, windowProps.height, windowProps.title, null, null, .{}) orelse {
             std.log.err("failed to create GLFW window: {?s}", .{glfw.getErrorString()});
             std.process.exit(1);
         };
@@ -37,6 +44,7 @@ pub const Engine = struct {
         const proc: glfw.GLProc = undefined;
         try gl.load(proc, glGetProcAddress);
 
+        self.camera.engine = self;
         self.camera.updateProjectionMatrix();
     }
 
@@ -73,7 +81,12 @@ pub const Camera = struct {
     fov: f32 = 75,
     aspectRatio: f32 = 1,
 
+    engine: *Engine = undefined,
+
     pub fn updateProjectionMatrix(self: *Camera) void {
+        const size = self.engine.window.?.getSize();
+        self.aspectRatio = @as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(size.height));
+
         self.projectionMatrix = math.Mat4x4.perspective(
             math.degreesToRadians(f32, self.fov),
             self.aspectRatio,
