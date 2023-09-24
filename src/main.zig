@@ -120,8 +120,9 @@ pub fn main() !void {
         motion.v[1] = @floatCast(@cos(glfw.getTime()));
 
         Shader.setUniform(0, motion);
-        Shader.setUniform(1, engine.camera.projectionMatrix);
-        Shader.setUniform(2, engine.camera.viewMatrix);
+        try shader.setUniformByName("_P", engine.camera.projectionMatrix);
+        try shader.setUniformByName("_V", engine.camera.viewMatrix);
+        try shader.setUniformByName("somethingsomething", motion);
 
         mesh.bind();
         mesh2.bind();
