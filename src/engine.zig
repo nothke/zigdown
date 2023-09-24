@@ -8,6 +8,7 @@ var instance: *Engine = undefined;
 pub const WindowProps = struct {
     width: u32 = 800,
     height: u32 = 600,
+    fullscreen: bool = true,
     title: [:0]const u8 = "zigdown!",
     vsync: bool = true,
 };
@@ -44,8 +45,28 @@ pub const Engine = struct {
             std.process.exit(1);
         }
 
+        var monitor = glfw.Monitor.getPrimary().?;
+        const mode = monitor.getVideoMode().?;
+
+        const width = if (windowProps.fullscreen) mode.getWidth() else windowProps.width;
+        const height = if (windowProps.fullscreen) mode.getHeight() else windowProps.height;
+
+        const hints = if (windowProps.fullscreen) glfw.Window.Hints{
+            .red_bits = @intCast(mode.getRedBits()),
+            .green_bits = @intCast(mode.getGreenBits()),
+            .blue_bits = @intCast(mode.getBlueBits()),
+            .refresh_rate = @intCast(mode.getRefreshRate()),
+        } else glfw.Window.Hints{};
+
         // Create our window
-        self.window = glfw.Window.create(windowProps.width, windowProps.height, windowProps.title, null, null, .{}) orelse {
+        self.window = glfw.Window.create(
+            width,
+            height,
+            windowProps.title,
+            if (windowProps.fullscreen) monitor else null,
+            null,
+            hints,
+        ) orelse {
             std.log.err("failed to create GLFW window: {?s}", .{glfw.getErrorString()});
             std.process.exit(1);
         };
