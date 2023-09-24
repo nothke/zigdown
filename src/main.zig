@@ -119,9 +119,9 @@ pub fn main() !void {
         motion.v[0] = @floatCast(@sin(glfw.getTime()));
         motion.v[1] = @floatCast(@cos(glfw.getTime()));
 
-        Shader.setVec3(0, motion);
-        Shader.setMatrix(1, engine.camera.projectionMatrix);
-        Shader.setMatrix(2, engine.camera.viewMatrix);
+        Shader.setUniform(0, motion);
+        Shader.setUniform(1, engine.camera.projectionMatrix);
+        Shader.setUniform(2, engine.camera.viewMatrix);
 
         mesh.bind();
         mesh2.bind();
