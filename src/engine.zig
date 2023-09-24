@@ -14,6 +14,10 @@ pub const Engine = struct {
     window: ?glfw.Window = null,
     camera: Camera = .{},
 
+    const Error = error{
+        GLError,
+    };
+
     const Self = @This();
 
     fn glGetProcAddress(p: glfw.GLProc, proc: [:0]const u8) ?gl.FunctionPointer {
@@ -113,7 +117,7 @@ pub const Mesh = struct {
         };
     }
 
-    pub fn create(self: *Self) void {
+    pub fn create(self: *Self) !void {
         // VAO, VBO, IBO
 
         var vao: u32 = undefined;
@@ -143,6 +147,8 @@ pub const Mesh = struct {
         self.vao = vao;
         self.vbo = vbo;
         self.ibo = ibo;
+
+        try glLogError();
     }
 
     pub fn bind(self: Self) void {
@@ -171,6 +177,7 @@ pub const Shader = struct {
     const Error = error{
         InvalidUniformName,
         ShaderCompilationFailed,
+        GLError,
     };
 
     fn logShaderError(shader: u32) !void {
@@ -208,6 +215,8 @@ pub const Shader = struct {
         gl.attachShader(self.program, vertShader);
         gl.attachShader(self.program, fragShader);
         gl.linkProgram(self.program);
+
+        try glLogError();
 
         gl.deleteShader(vertShader);
         gl.deleteShader(fragShader);
@@ -256,3 +265,27 @@ pub const Shader = struct {
         setUniform(location, value);
     }
 };
+
+fn glLogError() !void {
+    var err: gl.GLenum = gl.getError();
+    const hasErrored = err != gl.NO_ERROR;
+    while (err != gl.NO_ERROR) {
+        var errorString = switch (err) {
+            gl.INVALID_ENUM => "INVALID_ENUM",
+            gl.INVALID_VALUE => "INVALID_VALUE",
+            gl.INVALID_OPERATION => "INVALID_OPERATION",
+            gl.OUT_OF_MEMORY => "OUT_OF_MEMORY",
+            gl.INVALID_FRAMEBUFFER_OPERATION => "INVALID_FRAMEBUFFER_OPERATION",
+            else => "unknown error",
+        };
+
+        // GL_STACK_OVERFLOW and GL_STACK_UNDEFLOW don't exist??
+
+        std.log.err("Found OpenGL error: {s}", .{errorString});
+
+        err = gl.getError();
+    }
+
+    if (hasErrored)
+        return Engine.Error.GLError;
+}

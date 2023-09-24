@@ -35,7 +35,7 @@ pub fn main() !void {
     try mesh.vertices.appendSlice(vertices[0..]);
     try mesh.indices.appendSlice(indices[0..]);
 
-    mesh.create();
+    try mesh.create();
     defer mesh.deinit();
 
     var mesh2 = Mesh.init(alloc);
@@ -74,7 +74,7 @@ pub fn main() !void {
         6, 7, 3,
     });
 
-    mesh2.create();
+    try mesh2.create();
     defer mesh2.deinit();
 
     var shader = Shader{
