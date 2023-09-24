@@ -15,7 +15,7 @@ const Shapes = @import("shapes.zig");
 
 pub fn main() !void {
     var engine = Engine{};
-    try engine.init(.{});
+    try engine.init(.{ .height = 1024, .width = 1900 });
     defer engine.deinit();
 
     // Data
@@ -83,6 +83,13 @@ pub fn main() !void {
     var sphereGO = try engine.scene.?.addObject(&mesh2, &shader);
     var sphereGO2 = try engine.scene.?.addObject(&mesh2, &shader);
 
+    for (0..200) |i| {
+        _ = i;
+        _ = try engine.scene.?.addObject(&mesh2, &shader);
+    }
+
+    var pcg = std.rand.Pcg.init(345);
+
     while (engine.isRunning()) {
         const speed = 0.001;
 
@@ -133,6 +140,16 @@ pub fn main() !void {
 
         sphereGO.transform.local2world = modelMatrix;
         sphereGO2.transform.local2world = modelMatrix.mul(&math.Mat4x4.translate(math.vec3(5, 2, 0)));
+
+        for (engine.scene.?.objects.slice()) |*object| {
+            const xMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
+            const yMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
+            const zMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
+
+            const motionVec = math.vec3(xMotion, yMotion, zMotion);
+
+            object.transform.local2world = object.transform.local2world.mul(&math.Mat4x4.translate(motionVec));
+        }
 
         if (engine.scene) |scene| {
             try scene.render();
