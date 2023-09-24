@@ -91,7 +91,7 @@ pub fn main() !void {
     var camOffset = math.vec3(4, 0, 10);
 
     while (engine.isRunning()) {
-        const speed = 0.01;
+        const speed = 0.001;
 
         if (engine.keyPressed(.w)) {
             camOffset.v[2] -= speed;
@@ -118,7 +118,10 @@ pub fn main() !void {
 
         //Shader.setMatrix(0, engine.camera.projectionMatrix);
         shader.bind();
+
         motion.v[0] = @floatCast(@sin(glfw.getTime()));
+        motion.v[1] = @floatCast(@cos(glfw.getTime()));
+
         Shader.setVec3(0, motion);
         Shader.setMatrix(1, engine.camera.projectionMatrix);
         Shader.setMatrix(2, engine.camera.viewMatrix);

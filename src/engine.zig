@@ -27,7 +27,7 @@ pub const Engine = struct {
         }
 
         // Create our window
-        self.window = glfw.Window.create(1200, 1000, "Hello, mach-glfw!", null, null, .{}) orelse {
+        self.window = glfw.Window.create(400, 300, "zigdown!", null, null, .{}) orelse {
             std.log.err("failed to create GLFW window: {?s}", .{glfw.getErrorString()});
             std.process.exit(1);
         };
