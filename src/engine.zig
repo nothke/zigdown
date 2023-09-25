@@ -84,6 +84,8 @@ pub const Engine = struct {
 
         self.window.?.setKeyCallback(Input.keyCallback);
 
+        glfw.swapInterval(if (windowProps.vsync) 1 else 0);
+
         gl.enable(gl.DEPTH_TEST);
         gl.enable(gl.CULL_FACE);
     }
@@ -169,6 +171,14 @@ pub const Engine = struct {
             return self.keyAction(key, glfw.Action.repeat);
         }
     };
+
+    pub fn setWireframe(enable: bool) void {
+        if (enable) {
+            gl.polygonMode(gl.FRONT_AND_BACK, gl.LINE);
+        } else {
+            gl.polygonMode(gl.FRONT, gl.FILL);
+        }
+    }
 };
 
 pub const Camera = struct {
