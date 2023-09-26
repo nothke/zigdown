@@ -9,6 +9,8 @@ const Shader = _engine.Shader;
 const Vertex = _engine.Vertex;
 const Object = _engine.Object;
 
+const Color = @import("color.zig");
+
 const math = @import("mach").math;
 
 const Shapes = @import("shapes.zig");
@@ -16,9 +18,9 @@ const Shapes = @import("shapes.zig");
 pub fn main() !void {
     var engine = Engine{};
     try engine.init(.{
-        .height = 1024,
-        .width = 1900,
-        .fullscreen = true,
+        .width = 800, // 1900
+        .height = 600, // 1024
+        .fullscreen = false,
     });
     defer engine.deinit();
 
@@ -60,6 +62,9 @@ pub fn main() !void {
     var pcg = std.rand.Pcg.init(345);
 
     var lastFrameTime = glfw.getTime();
+
+    const color = Color.init(0, 0, 0, 0);
+    _ = color;
 
     while (engine.isRunning()) {
         var dt: f32 = @floatCast(glfw.getTime() - lastFrameTime);
@@ -124,4 +129,8 @@ pub fn main() !void {
             try scene.render();
         }
     }
+}
+
+test "color" {
+    _ = Color;
 }

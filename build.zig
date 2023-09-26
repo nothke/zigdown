@@ -48,6 +48,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    unit_tests.addModule("mach", @import("mach").module(mach_dep.builder, optimize, target));
+
     const run_unit_tests = b.addRunArtifact(unit_tests);
 
     const test_step = b.step("test", "Run unit tests");
