@@ -9,6 +9,7 @@ const Mesh = _engine.Mesh;
 const Shader = _engine.Shader;
 const Vertex = _engine.Vertex;
 const Object = _engine.Object;
+const Texture = _engine.Texture;
 
 const Color = @import("color.zig");
 
@@ -70,35 +71,17 @@ pub fn main() !void {
     const color = Color.init(0, 0, 0, 0);
     _ = color;
 
-    var w: c_int = undefined;
-    var h: c_int = undefined;
-    var channels: c_int = undefined;
-    var buffer = c.stbi_load("res/brick.png", &w, &h, &channels, 0);
-    if (buffer == null) {
-        std.log.err("Buffer is null", .{});
-    }
+    var brickTex = Texture{};
+    try brickTex.load("res/brick.png");
+    defer brickTex.deinit();
+    brickTex.log();
+    brickTex.create();
 
-    std.log.info("w: {}, h: {}", .{ w, h });
-    defer c.stbi_image_free(buffer);
-
-    var id: u32 = undefined;
-    gl.genTextures(1, &id);
-    try _engine.glLogError();
-    gl.bindTexture(gl.TEXTURE_2D, id);
-    try _engine.glLogError();
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    try _engine.glLogError();
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    try _engine.glLogError();
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    try _engine.glLogError();
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    try _engine.glLogError();
-
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, w, h, 0, gl.RGB, gl.UNSIGNED_BYTE, buffer);
-    try _engine.glLogError();
+    var testTex = Texture{};
+    try testTex.load("res/painting.png");
+    defer testTex.deinit();
+    testTex.log();
+    testTex.create();
 
     while (engine.isRunning()) {
         var dt: f32 = @floatCast(glfw.getTime() - lastFrameTime);
@@ -137,8 +120,6 @@ pub fn main() !void {
         //Shader.setMatrix(0, engine.camera.projectionMatrix);
         shader.bind();
 
-        gl.bindTexture(gl.TEXTURE_2D, id);
-
         motion.v[0] = @floatCast(@sin(glfw.getTime()));
         motion.v[1] = @floatCast(@cos(glfw.getTime()));
 
@@ -163,10 +144,18 @@ pub fn main() !void {
             object.transform.local2world = object.transform.local2world.mul(&math.Mat4x4.translate(motionVec));
         }
 
-        gl.bindTexture(gl.TEXTURE_2D, id);
+        // if (engine.scene) |scene| {
+        //     try scene.render();
+        // }
 
-        if (engine.scene) |scene| {
-            try scene.render();
+        var texturePickPCG = std.rand.Pcg.init(3411);
+
+        for (engine.scene.?.objects.constSlice()) |object| {
+            if (texturePickPCG.random().boolean()) {
+                brickTex.bind();
+            } else testTex.bind();
+
+            try object.render();
         }
     }
 }

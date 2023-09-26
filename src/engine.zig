@@ -2,6 +2,7 @@ const std = @import("std");
 const gl = @import("gl");
 const glfw = @import("mach-glfw");
 const math = @import("mach").math;
+const c = @import("c.zig");
 
 var instance: *Engine = undefined;
 
@@ -445,7 +446,78 @@ pub const Shader = struct {
     }
 };
 
-fn glLogError() !void {
+pub const Texture = struct {
+    width: i32 = 0,
+    height: i32 = 0,
+    channels: i32 = 0,
+    buffer: [*c]u8 = null,
+    id: u32 = 0,
+
+    const Error = error{
+        InvalidPath,
+        FailedLoading,
+    };
+
+    pub fn load(self: *Texture, path: [:0]const u8) !void {
+        var w: c_int = undefined;
+        var h: c_int = undefined;
+        var channels: c_int = undefined;
+
+        c.stbi_set_flip_vertically_on_load(1);
+        var buffer = c.stbi_load(path, &w, &h, &channels, 0);
+
+        if (buffer == null) {
+            return Error.FailedLoading;
+        }
+
+        self.width = w;
+        self.height = h;
+        self.channels = channels;
+        self.buffer = buffer;
+    }
+
+    pub fn create(self: *Texture) void {
+        gl.genTextures(1, &self.id);
+        gl.bindTexture(gl.TEXTURE_2D, self.id);
+        glLogError() catch {};
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        glLogError() catch {};
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        glLogError() catch {};
+
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGB,
+            self.width,
+            self.height,
+            0,
+            gl.RGB,
+            gl.UNSIGNED_BYTE,
+            self.buffer,
+        );
+        glLogError() catch {};
+    }
+
+    pub fn bind(self: Texture) void {
+        gl.bindTexture(gl.TEXTURE_2D, self.id);
+    }
+
+    pub fn deinit(self: Texture) void {
+        if (self.buffer != null)
+            c.stbi_image_free(self.buffer);
+    }
+
+    pub fn log(self: Texture) void {
+        std.log.info("width: {}, height: {}, channels: {}, isValid {}", .{ self.width, self.height, self.channels, self.buffer != null });
+    }
+};
+
+pub fn glLogError() !void {
     var err: gl.GLenum = gl.getError();
     const hasErrored = err != gl.NO_ERROR;
     while (err != gl.NO_ERROR) {
