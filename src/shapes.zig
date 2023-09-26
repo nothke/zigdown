@@ -65,3 +65,21 @@ pub fn sphere(mesh: *Mesh, radialSegments: i32, verticalSegments: i32, radius: f
         }
     }
 }
+
+pub fn quad(mesh: *Mesh) !void {
+    mesh.vertices.clearRetainingCapacity();
+    mesh.indices.clearRetainingCapacity();
+
+    const v3 = math.vec3;
+    const v2 = math.vec2;
+
+    try mesh.vertices.append(.{ .position = v3(0, 0, 0), .uv = v2(0, 0) });
+    try mesh.vertices.append(.{ .position = v3(1, 0, 0), .uv = v2(1, 0) });
+    try mesh.vertices.append(.{ .position = v3(0, 1, 0), .uv = v2(0, 1) });
+    try mesh.vertices.append(.{ .position = v3(1, 1, 0), .uv = v2(1, 1) });
+
+    try mesh.indices.appendSlice(&.{
+        0, 1, 2,
+        1, 3, 2,
+    });
+}

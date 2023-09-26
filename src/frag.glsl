@@ -12,7 +12,8 @@ void main()
     float light = dot(n, l);
 
     vec3 diffuse = vec3(1.0, 1.0, 1.0);
-    vec3 color = diffuse * light * 2;
+    //vec3 color = diffuse * light * 2;
+    vec3 color = diffuse;
 
     FragColor = vec4(color, 1.0) * _Color;
 } 

@@ -29,6 +29,16 @@ pub fn build(b: *std.Build) void {
         .source_file = .{ .path = "libs/gl41.zig" },
     }));
 
+    // Include C
+
+    exe.linkLibC();
+    exe.addCSourceFile(.{
+        .file = .{ .path = "libs/stb_image.c" },
+        .flags = &.{},
+    });
+
+    exe.addIncludePath(.{ .path = "libs" });
+
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);
