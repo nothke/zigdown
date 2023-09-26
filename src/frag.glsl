@@ -3,6 +3,8 @@ out vec4 FragColor;
 
 in vec3 out_norm;
 
+uniform vec4 _Color;
+
 void main()
 {
     vec3 n = out_norm;
@@ -12,5 +14,5 @@ void main()
     vec3 diffuse = vec3(1.0, 1.0, 1.0);
     vec3 color = diffuse * light * 2;
 
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(color, 1.0) * _Color;
 } 

@@ -111,6 +111,7 @@ pub fn main() !void {
         //Shader.setUniform(0, motion);
         try shader.setUniformByName("_P", engine.camera.projectionMatrix);
         try shader.setUniformByName("_V", engine.camera.viewMatrix);
+        try shader.setUniformByName("_Color", Color.chartreuse.toVec4());
 
         sphereGO.transform.local2world = modelMatrix;
         sphereGO2.transform.local2world = modelMatrix.mul(&math.Mat4x4.translate(math.vec3(5, 2, 0)));
