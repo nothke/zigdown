@@ -9,6 +9,7 @@
             "command": "zig",
             "args": [
                 "build",
+                "-freference-trace",
                 "run"
             ],
             "group": {

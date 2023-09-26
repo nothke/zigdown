@@ -214,15 +214,15 @@ pub const Transform = struct {
 
 pub const Object = struct {
     mesh: ?*Mesh = null,
-    shader: ?*Shader = null,
+    material: ?*Material = null,
     transform: Transform = .{},
 
     pub fn render(self: Object) !void {
         const meshPtr = self.mesh orelse return;
-        const shaderPtr = self.shader orelse return;
+        const materialPtr = self.material orelse return;
 
-        shaderPtr.bind();
-        try shaderPtr.setUniformByName("_M", self.transform.local2world);
+        try materialPtr.bind();
+        try materialPtr.shader.?.setUniformByName("_M", self.transform.local2world);
         meshPtr.bind();
     }
 };
@@ -230,9 +230,9 @@ pub const Object = struct {
 pub const Scene = struct {
     objects: std.BoundedArray(Object, 1024),
 
-    pub fn addObject(self: *Scene, mesh: *Mesh, shader: *Shader) !*Object {
+    pub fn addObject(self: *Scene, mesh: *Mesh, material: *Material) !*Object {
         var object = try self.objects.addOne();
-        object.* = .{ .mesh = mesh, .shader = shader };
+        object.* = .{ .mesh = mesh, .material = material };
         return object;
     }
 
@@ -411,28 +411,16 @@ pub const Shader = struct {
     }
 
     pub fn setUniform(location: i32, value: anytype) void {
-        comptime {
-            const T = @TypeOf(value);
+        const T = @TypeOf(value);
 
-            if (T != i32 and
-                T != f32 and
-                T != math.Vec2 and
-                T != math.Vec3 and
-                T != math.Vec4 and
-                T != math.Mat4x4)
-            {
-                @compileError("Uniform with type of " ++ @typeName(T) ++ " is not supported");
-            }
-        }
-
-        switch (@TypeOf(value)) {
-            inline i32 => gl.uniform1i(location, value),
-            inline f32 => gl.uniform1f(location, value),
-            inline math.Vec2 => gl.uniform2fv(location, 1, &value.v[0]),
-            inline math.Vec3 => gl.uniform3fv(location, 1, &value.v[0]),
-            inline math.Vec4 => gl.uniform4fv(location, 1, &value.v[0]),
-            inline math.Mat4x4 => gl.uniformMatrix4fv(location, 1, gl.FALSE, &value.v[0].v[0]),
-            inline else => unreachable,
+        switch (T) {
+            i32 => gl.uniform1i(location, value),
+            f32 => gl.uniform1f(location, value),
+            math.Vec2 => gl.uniform2fv(location, 1, &value.v[0]),
+            math.Vec3 => gl.uniform3fv(location, 1, &value.v[0]),
+            math.Vec4 => gl.uniform4fv(location, 1, &value.v[0]),
+            math.Mat4x4 => gl.uniformMatrix4fv(location, 1, gl.FALSE, &value.v[0].v[0]),
+            else => @compileError("Uniform with type of " ++ @typeName(T) ++ " is not supported"),
         }
     }
 
@@ -443,6 +431,45 @@ pub const Shader = struct {
             return Error.InvalidUniformName;
 
         setUniform(location, value);
+    }
+};
+
+pub const Material = struct {
+    shader: ?*Shader = null,
+    props: std.BoundedArray(Property, 16) = .{},
+
+    pub const Property = struct {
+        name: [:0]const u8,
+        data: Data,
+
+        const Data = union(enum) {
+            int: i32,
+            float: f32,
+            //texture: *Texture,
+            vec2: math.Vec3,
+            vec3: math.Vec3,
+            vec4: math.Vec4,
+            mat4: math.Mat4x4,
+        };
+    };
+
+    pub fn bind(self: Material) !void {
+        if (self.shader) |shader| {
+            shader.bind();
+
+            for (self.props.constSlice()) |prop| {
+                switch (prop.data) {
+                    inline else => |data| try shader.setUniformByName(prop.name, data),
+                }
+            }
+        }
+    }
+
+    pub fn addProperty(self: Material) !void {
+        try self.props.append(.{
+            .name = "property",
+            .data = .{ .int = 0 },
+        });
     }
 };
 

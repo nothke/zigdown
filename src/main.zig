@@ -10,6 +10,7 @@ const Shader = _engine.Shader;
 const Vertex = _engine.Vertex;
 const Object = _engine.Object;
 const Texture = _engine.Texture;
+const Material = _engine.Material;
 
 const Color = @import("color.zig");
 
@@ -45,31 +46,10 @@ pub fn main() !void {
 
     var shader = Shader{
         .vertSource = @embedFile("vert.glsl"),
-        .fragSource = @embedFile("texture_only.glsl"),
+        .fragSource = @embedFile("frag.glsl"),
     };
     try shader.compile();
     defer shader.deinit();
-
-    var motion = math.vec3(0, 0, 0);
-    var camOffset = math.vec3(4, 0, 10);
-
-    var wireframe = false;
-
-    engine.createScene();
-    var sphereGO = try engine.scene.?.addObject(&sphereMesh, &shader);
-    var sphereGO2 = try engine.scene.?.addObject(&sphereMesh, &shader);
-
-    for (0..200) |i| {
-        _ = i;
-        _ = try engine.scene.?.addObject(&sphereMesh, &shader);
-    }
-
-    var pcg = std.rand.Pcg.init(345);
-
-    var lastFrameTime = glfw.getTime();
-
-    const color = Color.init(0, 0, 0, 0);
-    _ = color;
 
     var brickTex = Texture{};
     try brickTex.load("res/brick.png");
@@ -82,6 +62,40 @@ pub fn main() !void {
     defer testTex.deinit();
     testTex.log();
     testTex.create();
+
+    var testMaterial = Material{ .shader = &shader };
+    //testMaterial.props.append(.{ .name = "_Texture", .data = .{ .texture = &testTex } });
+    try testMaterial.props.append(.{ .name = "_Color", .data = .{ .vec4 = Color.red.toVec4() } });
+
+    var brickMaterial = Material{ .shader = &shader };
+    //brickMaterial.props.append(.{ .name = "_Texture", .data = .{ .texture = &brickTex } });
+    try brickMaterial.props.append(.{ .name = "_Color", .data = .{ .vec4 = Color.blue.toVec4() } });
+
+    var motion = math.vec3(0, 0, 0);
+    var camOffset = math.vec3(4, 0, 10);
+
+    var wireframe = false;
+
+    engine.createScene();
+
+    var sphereGO = try engine.scene.?.addObject(&sphereMesh, &testMaterial);
+    var sphereGO2 = try engine.scene.?.addObject(&sphereMesh, &brickMaterial);
+
+    var pcg = std.rand.Pcg.init(345);
+
+    for (0..200) |i| {
+        _ = i;
+        if (pcg.random().boolean()) {
+            _ = try engine.scene.?.addObject(&sphereMesh, &testMaterial);
+        } else {
+            _ = try engine.scene.?.addObject(&sphereMesh, &brickMaterial);
+        }
+    }
+
+    var lastFrameTime = glfw.getTime();
+
+    const color = Color.init(0, 0, 0, 0);
+    _ = color;
 
     while (engine.isRunning()) {
         var dt: f32 = @floatCast(glfw.getTime() - lastFrameTime);
@@ -144,19 +158,19 @@ pub fn main() !void {
             object.transform.local2world = object.transform.local2world.mul(&math.Mat4x4.translate(motionVec));
         }
 
-        // if (engine.scene) |scene| {
-        //     try scene.render();
-        // }
-
-        var texturePickPCG = std.rand.Pcg.init(3411);
-
-        for (engine.scene.?.objects.constSlice()) |object| {
-            if (texturePickPCG.random().boolean()) {
-                brickTex.bind();
-            } else testTex.bind();
-
-            try object.render();
+        if (engine.scene) |scene| {
+            try scene.render();
         }
+
+        // var texturePickPCG = std.rand.Pcg.init(3411);
+
+        // for (engine.scene.?.objects.constSlice()) |object| {
+        //     if (texturePickPCG.random().boolean()) {
+        //         brickTex.bind();
+        //     } else testTex.bind();
+
+        //     try object.render();
+        // }
     }
 }
 
