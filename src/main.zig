@@ -74,6 +74,11 @@ pub fn main() !void {
     var h: c_int = undefined;
     var channels: c_int = undefined;
     var buffer = c.stbi_load("res/test.png", &w, &h, &channels, 4);
+    if (buffer == null) {
+        std.log.err("Buffer is null", .{});
+    }
+
+    std.log.info("w: {}, h: {}", .{ w, h });
     defer c.stbi_image_free(buffer);
 
     var id: u32 = undefined;
@@ -125,6 +130,8 @@ pub fn main() !void {
         //Shader.setMatrix(0, engine.camera.projectionMatrix);
         shader.bind();
 
+        gl.bindTexture(gl.TEXTURE_2D, id);
+
         motion.v[0] = @floatCast(@sin(glfw.getTime()));
         motion.v[1] = @floatCast(@cos(glfw.getTime()));
 
@@ -134,6 +141,9 @@ pub fn main() !void {
         try shader.setUniformByName("_P", engine.camera.projectionMatrix);
         try shader.setUniformByName("_V", engine.camera.viewMatrix);
         try shader.setUniformByName("_Color", Color.chartreuse.toVec4());
+        try shader.setUniformByName("_Texture", @as(i32, @intCast(id)));
+
+        gl.bindTexture(gl.TEXTURE_2D, id);
 
         sphereGO.transform.local2world = modelMatrix;
         sphereGO2.transform.local2world = modelMatrix.mul(&math.Mat4x4.translate(math.vec3(5, 2, 0)));

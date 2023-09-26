@@ -5,6 +5,7 @@ layout (location = 2) in vec3 norm;
 layout (location = 3) in vec4 col;
 
 out vec3 out_norm;
+out vec2 out_uv;
 
 uniform mat4 _P;
 uniform mat4 _V;
@@ -20,4 +21,5 @@ void main()
     vec3 p = pos;
     gl_Position = local2clip(pos);
     out_norm = norm;
+    out_uv = uv;
 }
