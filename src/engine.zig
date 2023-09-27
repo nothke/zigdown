@@ -5,6 +5,16 @@ const math = @import("mach").math;
 const c = @import("c.zig");
 const Color = @import("color.zig");
 
+const Vec2 = math.Vec2;
+const Vec3 = math.Vec3;
+const Vec4 = math.Vec4;
+const Mat4x4 = math.Mat4x4;
+
+const ident = Mat4x4.ident;
+const v2zero = math.vec2(0, 0);
+const v3zero = math.vec3(0, 0, 0);
+const v4zero = math.vec4(0, 0, 0, 0);
+
 var instance: *Engine = undefined;
 
 pub const WindowProps = struct {
@@ -184,8 +194,8 @@ pub const Engine = struct {
 };
 
 pub const Camera = struct {
-    projectionMatrix: math.Mat4x4 = math.Mat4x4.ident,
-    viewMatrix: math.Mat4x4 = math.Mat4x4.ident,
+    projectionMatrix: Mat4x4 = ident,
+    viewMatrix: Mat4x4 = ident,
 
     nearPlane: f32 = -1,
     farPlane: f32 = 1,
@@ -198,7 +208,7 @@ pub const Camera = struct {
         const size = self.engine.window.?.getSize();
         self.aspectRatio = @as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(size.height));
 
-        self.projectionMatrix = math.Mat4x4.perspective(
+        self.projectionMatrix = Mat4x4.perspective(
             math.degreesToRadians(f32, self.fov),
             self.aspectRatio,
             self.nearPlane,
@@ -207,10 +217,8 @@ pub const Camera = struct {
     }
 };
 
-const ident = math.Mat4x4.ident;
-
 pub const Transform = struct {
-    local2world: math.Mat4x4 = ident,
+    local2world: Mat4x4 = ident,
 };
 
 pub const Object = struct {
@@ -244,23 +252,13 @@ pub const Scene = struct {
     }
 };
 
-const v2zero = math.vec2(0, 0);
-const v3zero = math.vec3(0, 0, 0);
-const v4zero = math.vec4(0, 0, 0, 0);
-
 pub const Vertex = extern struct {
-    position: math.Vec3 = v3zero,
-    uv: math.Vec2 = v2zero,
-    normal: math.Vec3 = v3zero,
-    color: math.Vec4 = v4zero,
+    position: Vec3 = v3zero,
+    uv: Vec2 = v2zero,
+    normal: Vec3 = v3zero,
+    color: Vec4 = v4zero,
 
     fn addAttributes() void {
-        // logOffset("position");
-        // logOffset("uv");
-        // logOffset("normal");
-        // logOffset("color");
-
-        //const fs = @sizeOf(f32);
         Mesh.addElement(0, false, 3, 0); // position
         Mesh.addElement(1, false, 2, @offsetOf(Vertex, "uv")); // uvs
         Mesh.addElement(2, false, 3, @offsetOf(Vertex, "normal")); // normals
@@ -417,10 +415,10 @@ pub const Shader = struct {
         switch (T) {
             i32 => gl.uniform1i(location, value),
             f32 => gl.uniform1f(location, value),
-            math.Vec2 => gl.uniform2fv(location, 1, &value.v[0]),
-            math.Vec3 => gl.uniform3fv(location, 1, &value.v[0]),
-            math.Vec4 => gl.uniform4fv(location, 1, &value.v[0]),
-            math.Mat4x4 => gl.uniformMatrix4fv(location, 1, gl.FALSE, &value.v[0].v[0]),
+            Vec2 => gl.uniform2fv(location, 1, &value.v[0]),
+            Vec3 => gl.uniform3fv(location, 1, &value.v[0]),
+            Vec4 => gl.uniform4fv(location, 1, &value.v[0]),
+            Mat4x4 => gl.uniformMatrix4fv(location, 1, gl.FALSE, &value.v[0].v[0]),
             else => @compileError("Uniform with type of " ++ @typeName(T) ++ " is not supported"),
         }
     }
@@ -450,10 +448,10 @@ pub const Material = struct {
             int: i32,
             float: f32,
             texture: *Texture,
-            vec2: math.Vec3,
-            vec3: math.Vec3,
-            vec4: math.Vec4,
-            mat4: math.Mat4x4,
+            vec2: Vec3,
+            vec3: Vec3,
+            vec4: Vec4,
+            mat4: Mat4x4,
             color: Color,
         };
     };
