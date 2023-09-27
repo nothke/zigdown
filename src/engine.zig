@@ -465,7 +465,7 @@ pub const Material = struct {
             for (self.props.constSlice()) |prop| {
                 switch (prop.data) {
                     .texture => |texture| {
-                        texture.bind(textureUnit);
+                        try texture.bind(textureUnit);
                         try shader.setUniformByName(prop.name, textureUnit);
                         textureUnit += 1;
                     },
@@ -525,18 +525,18 @@ pub const Texture = struct {
         self.buffer = buffer;
     }
 
-    pub fn create(self: *Texture) void {
+    pub fn create(self: *Texture) !void {
         gl.genTextures(1, &self.id);
         gl.bindTexture(gl.TEXTURE_2D, self.id);
-        glLogError() catch {};
+        try glLogError();
 
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        glLogError() catch {};
+        try glLogError();
 
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-        glLogError() catch {};
+        try glLogError();
 
         gl.texImage2D(
             gl.TEXTURE_2D,
@@ -549,13 +549,14 @@ pub const Texture = struct {
             gl.UNSIGNED_BYTE,
             self.buffer,
         );
-        glLogError() catch {};
+        try glLogError();
     }
 
-    pub fn bind(self: Texture, slot: i32) void {
+    pub fn bind(self: Texture, slot: i32) !void {
         gl.activeTexture(gl.TEXTURE0 + @as(c_uint, @intCast(slot)));
+        try glLogError();
         gl.bindTexture(gl.TEXTURE_2D, self.id);
-        glLogError() catch {};
+        try glLogError();
     }
 
     pub fn deinit(self: Texture) void {

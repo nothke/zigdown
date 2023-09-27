@@ -61,13 +61,13 @@ pub fn main() !void {
     try brickTex.load("res/uv_checker.png");
     defer brickTex.deinit();
     brickTex.log();
-    brickTex.create();
+    try brickTex.create();
 
     var testTex = Texture{};
     try testTex.load("res/painting.png");
     defer testTex.deinit();
     testTex.log();
-    testTex.create();
+    try testTex.create();
 
     var testMaterial = Material{ .shader = &shader };
     try testMaterial.addProp("_Color", Color.white);
