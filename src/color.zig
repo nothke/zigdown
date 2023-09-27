@@ -1,12 +1,19 @@
 const std = @import("std");
 const math = @import("mach").math;
 
-r: f32 = 0,
-g: f32 = 0,
-b: f32 = 0,
-a: f32 = 1,
+const ColorMethods = @This();
 
-const Color = @This();
+pub const Color = extern struct {
+    r: f32 = 0,
+    g: f32 = 0,
+    b: f32 = 0,
+    a: f32 = 1,
+
+    pub usingnamespace ColorMethods;
+};
+
+const f32x4 = @Vector(4, f32);
+const u8x4 = @Vector(4, u8);
 
 pub fn init(r: f32, g: f32, b: f32, a: f32) Color {
     return .{ .r = r, .g = g, .b = b, .a = a };
@@ -31,20 +38,20 @@ pub fn multRGB(self: Color, mult: f32) Color {
 }
 
 pub fn saturate(self: Color) Color {
-    return .{
-        .r = @max(@min(self.r, 1), 0),
-        .g = @max(@min(self.g, 1), 0),
-        .b = @max(@min(self.b, 1), 0),
-        .a = @max(@min(self.a, 1), 0),
-    };
+    const min = @min(self.toVec(), vecFromScalar(1));
+    return fromVec(@max(min, vecFromScalar(0)));
 }
 
-pub fn toVec(self: Color) @Vector(4, f32) {
-    return .{ self.r, self.g, self.b, self.a };
+pub fn toVec(self: Color) f32x4 {
+    return @bitCast(self);
 }
 
-pub fn fromVec(v: @Vector(4, f32)) Color {
-    return .{ .r = v[0], .g = v[1], .b = v[2], .a = v[3] };
+pub fn fromVec(v: f32x4) Color {
+    return @bitCast(v);
+}
+
+pub fn vecFromScalar(scalar: f32) f32x4 {
+    return @splat(scalar);
 }
 
 pub fn toRGBVec3(self: Color) math.Vec3 {
@@ -52,18 +59,15 @@ pub fn toRGBVec3(self: Color) math.Vec3 {
 }
 
 pub fn toVec4(self: Color) math.Vec4 {
-    return .{ .v = toVec(self) };
+    return @bitCast(self);
 }
 
 pub fn from255(c: Color) Color {
-    return fromVec(toVec(c) / @as(ColorV, @splat(255)));
+    return fromVec(toVec(c) / vecFromScalar(255));
 }
 
-const ColorV = @Vector(4, f32);
-const ByteColorV = @Vector(4, u8);
-
-pub fn fromByteV(v: ByteColorV) Color {
-    return fromVec(@as(ColorV, @floatFromInt(v)) / @as(ColorV, @splat(255)));
+pub fn fromByteV(v: u8x4) Color {
+    return fromVec(@as(f32x4, @floatFromInt(v)) / vecFromScalar(255));
 }
 
 const Error = error{
@@ -79,12 +83,10 @@ pub fn fromHex(hex: []const u8) !Color {
         }
     }
 
-    const r = try std.fmt.parseInt(u8, hex[0..2], 16);
-    const g = try std.fmt.parseInt(u8, hex[2..4], 16);
-    const b = try std.fmt.parseInt(u8, hex[4..6], 16);
-    const a = if (hex.len == 6) 255 else try std.fmt.parseInt(u8, hex[6..8], 16);
-
-    return fromByteV(ByteColorV{ r, g, b, a });
+    var buf: [4]u8 = undefined;
+    buf[3] = 255; // default alpha to 1
+    _ = try std.fmt.hexToBytes(&buf, hex);
+    return fromByteV(@bitCast(buf));
 }
 
 pub const white = init(1, 1, 1, 1);
@@ -131,7 +133,7 @@ test "white" {
 
 test "blank" {
     var color = Color{};
-    try isEq(color, fromVec(@Vector(4, f32){ 0, 0, 0, 1 }));
+    try isEq(color, fromVec(f32x4{ 0, 0, 0, 1 }));
 }
 
 test "saturate" {
@@ -153,7 +155,7 @@ test "vec3" {
 }
 
 test "ByteColor to Color" {
-    const byteColor = ByteColorV{ 255, 0, 0, 255 };
+    const byteColor = u8x4{ 255, 0, 0, 255 };
     const color = fromByteV(byteColor);
     try isEq(red, color);
 }
