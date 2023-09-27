@@ -66,12 +66,16 @@ pub fn from255(c: Color) Color {
     return fromVec(toVec(c) / vecFromScalar(255));
 }
 
-pub fn fromByteV(v: u8x4) Color {
+pub fn fromU8x4(v: u8x4) Color {
     return fromVec(@as(f32x4, @floatFromInt(v)) / vecFromScalar(255));
 }
 
+pub fn toU8x4(c: Color) u8x4 {
+    return @as(u8x4, @intFromFloat(toVec(c.saturate()) * vecFromScalar(255)));
+}
+
 const Error = error{
-    HexMustBe8CharsLong,
+    HexMustBe6or8CharsLong,
 };
 
 pub fn fromHex(hex: []const u8) !Color {
@@ -79,14 +83,14 @@ pub fn fromHex(hex: []const u8) !Color {
         if (@inComptime()) {
             @compileError("Color hex code must be 8 characters long");
         } else {
-            return Error.HexMustBe8CharsLong;
+            return Error.HexMustBe6or8CharsLong;
         }
     }
 
     var buf: [4]u8 = undefined;
     buf[3] = 255; // default alpha to 1
     _ = try std.fmt.hexToBytes(&buf, hex);
-    return fromByteV(@bitCast(buf));
+    return fromU8x4(@bitCast(buf));
 }
 
 pub const white = init(1, 1, 1, 1);
@@ -156,8 +160,13 @@ test "vec3" {
 
 test "ByteColor to Color" {
     const byteColor = u8x4{ 255, 0, 0, 255 };
-    const color = fromByteV(byteColor);
+    const color = fromU8x4(byteColor);
     try isEq(red, color);
+}
+
+test "Color to ByteColor" {
+    const byteColor = toU8x4(red);
+    try isEq(byteColor, u8x4{ 255, 0, 0, 255 });
 }
 
 test "hex" {
@@ -171,7 +180,7 @@ test "comptime hex" {
 }
 
 test "hex wrong length" {
-    try testing.expectError(Error.HexMustBe8CharsLong, fromHex("ff00"));
+    try testing.expectError(Error.HexMustBe6or8CharsLong, fromHex("ff00"));
 }
 
 test "hex 6 sized" {
