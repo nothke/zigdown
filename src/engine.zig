@@ -433,6 +433,10 @@ pub const Shader = struct {
         }
 
         setUniform(location, value);
+        glLogError() catch |err| {
+            std.log.err("Attempting to set uniform '{s}' at location {} with value of type: {}", .{ name, location, @TypeOf(value) });
+            return err;
+        };
     }
 };
 
@@ -472,6 +476,8 @@ pub const Material = struct {
                     .color => |color| try shader.setUniformByName(prop.name, color.toVec4()),
                     inline else => |data| try shader.setUniformByName(prop.name, data),
                 }
+
+                try glLogError();
             }
         }
     }
@@ -553,6 +559,7 @@ pub const Texture = struct {
     }
 
     pub fn bind(self: Texture, slot: i32) !void {
+        glClearError();
         gl.activeTexture(gl.TEXTURE0 + @as(c_uint, @intCast(slot)));
         try glLogError();
         gl.bindTexture(gl.TEXTURE_2D, self.id);
@@ -591,4 +598,8 @@ pub fn glLogError() !void {
 
     if (hasErrored)
         return Engine.Error.GLError;
+}
+
+pub fn glClearError() void {
+    while (gl.getError() != gl.NO_ERROR) {}
 }
