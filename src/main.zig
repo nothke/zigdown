@@ -27,22 +27,28 @@ pub fn main() !void {
     });
     defer engine.deinit();
 
-    _ = c;
-
-    // Data
-
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
     const alloc = gpa.allocator();
 
-    // Cube
-
     var sphereMesh = Mesh.init(alloc);
-    //try Shapes.sphere(&sphereMesh, 64, 32, 1);
-    try Shapes.quad(&sphereMesh);
-
-    try sphereMesh.create();
     defer sphereMesh.deinit();
+    try Shapes.sphere(&sphereMesh, 32, 16, 1);
+    try sphereMesh.create();
+
+    // Quad
+
+    var quadMesh = Mesh.init(alloc);
+    try Shapes.quad(&quadMesh);
+
+    for (quadMesh.vertices.items) |*v| {
+        v.position = v.position.add(&math.vec3(2, 0, 0));
+    }
+
+    try Shapes.quad(&quadMesh);
+
+    try quadMesh.create();
+    defer quadMesh.deinit();
 
     var shader = Shader{
         .vertSource = @embedFile("vert.glsl"),
@@ -66,7 +72,6 @@ pub fn main() !void {
     var testMaterial = Material{ .shader = &shader };
     try testMaterial.addProp("_Color", Color.red);
     try testMaterial.addProp("_Texture", &testTex);
-    //try testMaterial.addProp("_BadProp", engine);
 
     var brickMaterial = Material{ .shader = &shader };
     try brickMaterial.addProp("_Color", Color.blue);
@@ -87,9 +92,9 @@ pub fn main() !void {
     for (0..200) |i| {
         _ = i;
         if (pcg.random().boolean()) {
-            _ = try engine.scene.?.addObject(&sphereMesh, &testMaterial);
+            _ = try engine.scene.?.addObject(&quadMesh, &testMaterial);
         } else {
-            _ = try engine.scene.?.addObject(&sphereMesh, &brickMaterial);
+            _ = try engine.scene.?.addObject(&quadMesh, &brickMaterial);
         }
     }
 
@@ -132,7 +137,6 @@ pub fn main() !void {
         const camOffsetMatrix = math.Mat4x4.translate(camOffset);
         engine.camera.viewMatrix = math.Mat4x4.ident.mul(&camOffsetMatrix);
 
-        //Shader.setMatrix(0, engine.camera.projectionMatrix);
         shader.bind();
 
         motion.v[0] = @floatCast(@sin(glfw.getTime()));
@@ -140,11 +144,8 @@ pub fn main() !void {
 
         var modelMatrix: math.Mat4x4 = math.Mat4x4.ident.mul(&math.Mat4x4.translate(motion));
 
-        //Shader.setUniform(0, motion);
         try shader.setUniformByName("_P", engine.camera.projectionMatrix);
         try shader.setUniformByName("_V", engine.camera.viewMatrix);
-        //try shader.setUniformByName("_Color", Color.chartreuse.toVec4());
-        //try shader.setUniformByName("_Texture", @as(i32, @intCast(id)));
 
         sphereGO.transform.local2world = modelMatrix;
         sphereGO2.transform.local2world = modelMatrix.mul(&math.Mat4x4.translate(math.vec3(5, 2, 0)));
@@ -159,19 +160,7 @@ pub fn main() !void {
             object.transform.local2world = object.transform.local2world.mul(&math.Mat4x4.translate(motionVec));
         }
 
-        if (engine.scene) |scene| {
-            try scene.render();
-        }
-
-        // var texturePickPCG = std.rand.Pcg.init(3411);
-
-        // for (engine.scene.?.objects.constSlice()) |object| {
-        //     if (texturePickPCG.random().boolean()) {
-        //         brickTex.bind();
-        //     } else testTex.bind();
-
-        //     try object.render();
-        // }
+        if (engine.scene) |scene| try scene.render();
     }
 }
 

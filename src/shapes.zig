@@ -23,8 +23,7 @@ pub fn sphere(mesh: *Mesh, radialSegments: i32, verticalSegments: i32, radius: f
     const radSegs: u32 = @intCast(if (radialSegments < 3) 3 else radialSegments);
     const vertSegs: u32 = @intCast(if (verticalSegments < 3) 3 else verticalSegments);
 
-    mesh.vertices.clearRetainingCapacity();
-    mesh.indices.clearRetainingCapacity();
+    const vCt: u32 = @intCast(mesh.vertices.items.len);
 
     for (0..(vertSegs + 1)) |v| {
         const height = -@cos(tof32(v) / tof32(vertSegs) * std.math.pi) * radius;
@@ -50,8 +49,8 @@ pub fn sphere(mesh: *Mesh, radialSegments: i32, verticalSegments: i32, radius: f
 
     for (0..radSegs) |r| {
         for (0..vertSegs) |v| {
-            const v0 = ((radSegs + 1) * v) + r;
-            const v1 = ((radSegs + 1) * v) + r + 1;
+            const v0 = vCt + ((radSegs + 1) * v) + r;
+            const v1 = vCt + ((radSegs + 1) * v) + r + 1;
             const v2 = v0 + (radSegs + 1);
             const v3 = v1 + (radSegs + 1);
 
@@ -67,11 +66,10 @@ pub fn sphere(mesh: *Mesh, radialSegments: i32, verticalSegments: i32, radius: f
 }
 
 pub fn quad(mesh: *Mesh) !void {
-    mesh.vertices.clearRetainingCapacity();
-    mesh.indices.clearRetainingCapacity();
-
     const v3 = math.vec3;
     const v2 = math.vec2;
+
+    const i: u32 = @intCast(mesh.vertices.items.len);
 
     try mesh.vertices.append(.{ .position = v3(0, 0, 0), .uv = v2(0, 0) });
     try mesh.vertices.append(.{ .position = v3(1, 0, 0), .uv = v2(1, 0) });
@@ -79,7 +77,7 @@ pub fn quad(mesh: *Mesh) !void {
     try mesh.vertices.append(.{ .position = v3(1, 1, 0), .uv = v2(1, 1) });
 
     try mesh.indices.appendSlice(&.{
-        0, 1, 2,
-        1, 3, 2,
+        i + 0, i + 1, i + 2,
+        i + 1, i + 3, i + 2,
     });
 }
