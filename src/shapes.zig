@@ -52,20 +52,19 @@ pub fn sphere(mesh: *Mesh, radialSegments: i32, verticalSegments: i32, radius: f
         vertex.normal = vertex.position.normalize(1);
     }
 
-    for (0..radSegs) |r| {
-        for (0..vertSegs) |v| {
+    var r: u32 = 0;
+    while (r < radSegs) : (r += 1) {
+        var v: u32 = 0;
+        while (v < vertSegs) : (v += 1) {
             const v0 = vCt + ((radSegs + 1) * v) + r;
             const v1 = vCt + ((radSegs + 1) * v) + r + 1;
             const v2 = v0 + (radSegs + 1);
             const v3 = v1 + (radSegs + 1);
 
-            try mesh.indices.append(@intCast(v0));
-            try mesh.indices.append(@intCast(v1));
-            try mesh.indices.append(@intCast(v2));
-
-            try mesh.indices.append(@intCast(v1));
-            try mesh.indices.append(@intCast(v3));
-            try mesh.indices.append(@intCast(v2));
+            try mesh.indices.appendSlice(&.{
+                v0, v1, v2,
+                v1, v3, v2,
+            });
         }
     }
 }
@@ -78,10 +77,12 @@ pub fn quad(mesh: *Mesh) !void {
 
     const norm = math.vec3(0, 0, -1);
 
-    try mesh.vertices.append(.{ .position = v3(0, 0, 0), .uv = v2(0, 0), .normal = norm });
-    try mesh.vertices.append(.{ .position = v3(1, 0, 0), .uv = v2(1, 0), .normal = norm });
-    try mesh.vertices.append(.{ .position = v3(0, 1, 0), .uv = v2(0, 1), .normal = norm });
-    try mesh.vertices.append(.{ .position = v3(1, 1, 0), .uv = v2(1, 1), .normal = norm });
+    try mesh.vertices.appendSlice(&.{
+        .{ .position = v3(0, 0, 0), .uv = v2(0, 0), .normal = norm },
+        .{ .position = v3(1, 0, 0), .uv = v2(1, 0), .normal = norm },
+        .{ .position = v3(0, 1, 0), .uv = v2(0, 1), .normal = norm },
+        .{ .position = v3(1, 1, 0), .uv = v2(1, 1), .normal = norm },
+    });
 
     try mesh.indices.appendSlice(&.{
         i + 0, i + 1, i + 2,
