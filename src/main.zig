@@ -64,12 +64,13 @@ pub fn main() !void {
     testTex.create();
 
     var testMaterial = Material{ .shader = &shader };
-    //testMaterial.props.append(.{ .name = "_Texture", .data = .{ .texture = &testTex } });
-    try testMaterial.props.append(.{ .name = "_Color", .data = .{ .vec4 = Color.red.toVec4() } });
+    try testMaterial.addProp("_Color", Color.red.toVec4());
+    try testMaterial.addProp("_Texture", &testTex);
+    try testMaterial.addProp("_BadProp", engine);
 
     var brickMaterial = Material{ .shader = &shader };
-    //brickMaterial.props.append(.{ .name = "_Texture", .data = .{ .texture = &brickTex } });
-    try brickMaterial.props.append(.{ .name = "_Color", .data = .{ .vec4 = Color.blue.toVec4() } });
+    try brickMaterial.addProp("_Color", Color.blue.toVec4());
+    try brickMaterial.addProp("_Texture", &brickTex);
 
     var motion = math.vec3(0, 0, 0);
     var camOffset = math.vec3(4, 0, 10);

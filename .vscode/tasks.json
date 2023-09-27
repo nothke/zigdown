@@ -20,7 +20,8 @@
                 "reveal": "silent",
                 "showReuseMessage": false,
                 "clear": true
-            }
+            },
+            "problemMatcher": "$zig",
         },
         {
             "label": "zig run",

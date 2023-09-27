@@ -445,7 +445,7 @@ pub const Material = struct {
         const Data = union(enum) {
             int: i32,
             float: f32,
-            //texture: *Texture,
+            texture: *Texture,
             vec2: math.Vec3,
             vec3: math.Vec3,
             vec4: math.Vec4,
@@ -457,19 +457,37 @@ pub const Material = struct {
         if (self.shader) |shader| {
             shader.bind();
 
+            var textureUnit: i32 = 0;
+
             for (self.props.constSlice()) |prop| {
                 switch (prop.data) {
+                    .texture => |texture| {
+                        texture.bind(textureUnit);
+                        try shader.setUniformByName(prop.name, textureUnit);
+                        textureUnit += 1;
+                    },
                     inline else => |data| try shader.setUniformByName(prop.name, data),
                 }
             }
         }
     }
 
-    pub fn addProperty(self: Material) !void {
-        try self.props.append(.{
-            .name = "property",
-            .data = .{ .int = 0 },
-        });
+    pub fn addProp(self: *Material, name: [:0]const u8, value: anytype) !void {
+        const T = @TypeOf(value);
+
+        // sets union field deduced from type of value
+        inline for (std.meta.fields(Property.Data)) |field| {
+            if (field.type == T) {
+                try self.props.append(Property{
+                    .name = name,
+                    .data = @unionInit(Property.Data, field.name, value),
+                });
+
+                return;
+            }
+        }
+
+        @compileError(@typeName(T) ++ " is an unsupported property type");
     }
 };
 
@@ -530,8 +548,10 @@ pub const Texture = struct {
         glLogError() catch {};
     }
 
-    pub fn bind(self: Texture) void {
+    pub fn bind(self: Texture, slot: i32) void {
+        gl.activeTexture(gl.TEXTURE0 + @as(c_uint, @intCast(slot)));
         gl.bindTexture(gl.TEXTURE_2D, self.id);
+        glLogError() catch {};
     }
 
     pub fn deinit(self: Texture) void {
