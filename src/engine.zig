@@ -3,6 +3,7 @@ const gl = @import("gl");
 const glfw = @import("mach-glfw");
 const math = @import("mach").math;
 const c = @import("c.zig");
+const Color = @import("color.zig");
 
 var instance: *Engine = undefined;
 
@@ -453,6 +454,7 @@ pub const Material = struct {
             vec3: math.Vec3,
             vec4: math.Vec4,
             mat4: math.Mat4x4,
+            color: Color,
         };
     };
 
@@ -469,6 +471,7 @@ pub const Material = struct {
                         try shader.setUniformByName(prop.name, textureUnit);
                         textureUnit += 1;
                     },
+                    .color => |color| try shader.setUniformByName(prop.name, color.toVec4()),
                     inline else => |data| try shader.setUniformByName(prop.name, data),
                 }
             }
