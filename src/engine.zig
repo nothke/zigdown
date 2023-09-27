@@ -3,7 +3,7 @@ const gl = @import("gl");
 const glfw = @import("mach-glfw");
 const math = @import("mach").math;
 const c = @import("c.zig");
-const Color = @import("color.zig");
+const Color = @import("color.zig").Color;
 
 const Vec2 = math.Vec2;
 const Vec3 = math.Vec3;
