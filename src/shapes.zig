@@ -11,11 +11,14 @@ fn tof32(value: anytype) f32 {
     return @as(f32, @floatFromInt(value));
 }
 
-fn CirclePoints(points: *std.ArrayList(math.Vec3), sides: u32, radius: f32) !void {
+fn circlePoints(points: []math.Vec3, sides: u32, radius: f32) !void {
+    if (points.len != sides + 1)
+        @panic("Points slice must be sides + 1");
+
     for (0..sides + 1) |i| {
         var theta = tof32(i) * 2 * math.pi / tof32(sides);
         var ci = math.vec3(@cos(theta) * radius, 0, @sin(theta) * radius);
-        try points.append(ci);
+        points[i] = ci;
     }
 }
 
@@ -29,17 +32,19 @@ pub fn sphere(mesh: *Mesh, radialSegments: i32, verticalSegments: i32, radius: f
         const height = -@cos(tof32(v) / tof32(vertSegs) * std.math.pi) * radius;
         const ringRadius = @sin(tof32(v) / tof32(vertSegs) * std.math.pi) * radius;
 
-        var buffer: [256 * @sizeOf(math.Vec3)]u8 = undefined;
-        var fba = std.heap.FixedBufferAllocator.init(&buffer);
-        var verts = std.ArrayList(math.Vec3).init(fba.allocator());
-        defer verts.deinit();
-
-        try CirclePoints(&verts, radSegs, ringRadius);
+        var buffer = try std.BoundedArray(math.Vec3, 256).init(radSegs + 1);
+        try circlePoints(buffer.slice(), radSegs, ringRadius);
 
         for (0..radSegs + 1) |i| {
-            verts.items[i].v[1] += height;
+            buffer.slice()[i].v[1] += height;
 
-            try mesh.vertices.append(Vertex{ .position = verts.items[i] });
+            const texU: f32 = tof32(i) / tof32(radSegs + 1);
+            const texV: f32 = tof32(v) / tof32(vertSegs + 1);
+
+            try mesh.vertices.append(Vertex{
+                .position = buffer.slice()[i],
+                .uv = math.vec2(texU, texV),
+            });
         }
     }
 
@@ -71,10 +76,12 @@ pub fn quad(mesh: *Mesh) !void {
 
     const i: u32 = @intCast(mesh.vertices.items.len);
 
-    try mesh.vertices.append(.{ .position = v3(0, 0, 0), .uv = v2(0, 0) });
-    try mesh.vertices.append(.{ .position = v3(1, 0, 0), .uv = v2(1, 0) });
-    try mesh.vertices.append(.{ .position = v3(0, 1, 0), .uv = v2(0, 1) });
-    try mesh.vertices.append(.{ .position = v3(1, 1, 0), .uv = v2(1, 1) });
+    const norm = math.vec3(0, 0, -1);
+
+    try mesh.vertices.append(.{ .position = v3(0, 0, 0), .uv = v2(0, 0), .normal = norm });
+    try mesh.vertices.append(.{ .position = v3(1, 0, 0), .uv = v2(1, 0), .normal = norm });
+    try mesh.vertices.append(.{ .position = v3(0, 1, 0), .uv = v2(0, 1), .normal = norm });
+    try mesh.vertices.append(.{ .position = v3(1, 1, 0), .uv = v2(1, 1), .normal = norm });
 
     try mesh.indices.appendSlice(&.{
         i + 0, i + 1, i + 2,

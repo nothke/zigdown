@@ -58,7 +58,7 @@ pub fn main() !void {
     defer shader.deinit();
 
     var brickTex = Texture{};
-    try brickTex.load("res/brick.png");
+    try brickTex.load("res/uv_checker.png");
     defer brickTex.deinit();
     brickTex.log();
     brickTex.create();
@@ -70,12 +70,12 @@ pub fn main() !void {
     testTex.create();
 
     var testMaterial = Material{ .shader = &shader };
-    try testMaterial.addProp("_Color", Color.red);
+    try testMaterial.addProp("_Color", Color.white);
     try testMaterial.addProp("_Texture", &testTex);
 
     var brickMaterial = Material{ .shader = &shader };
-    try brickMaterial.addProp("_Color", Color.blue);
-    try brickMaterial.addProp("_Texture", &testTex);
+    try brickMaterial.addProp("_Color", Color.white);
+    try brickMaterial.addProp("_Texture", &brickTex);
 
     var motion = math.vec3(0, 0, 0);
     var camOffset = math.vec3(4, 0, 10);
@@ -88,15 +88,16 @@ pub fn main() !void {
     var sphereGO2 = try engine.scene.?.addObject(&sphereMesh, &brickMaterial);
 
     var pcg = std.rand.Pcg.init(345);
+    _ = pcg;
 
-    for (0..200) |i| {
-        _ = i;
-        if (pcg.random().boolean()) {
-            _ = try engine.scene.?.addObject(&quadMesh, &testMaterial);
-        } else {
-            _ = try engine.scene.?.addObject(&quadMesh, &brickMaterial);
-        }
-    }
+    // for (0..200) |i| {
+    //     _ = i;
+    //     if (pcg.random().boolean()) {
+    //         _ = try engine.scene.?.addObject(&quadMesh, &testMaterial);
+    //     } else {
+    //         _ = try engine.scene.?.addObject(&quadMesh, &brickMaterial);
+    //     }
+    // }
 
     var lastFrameTime = glfw.getTime();
 
@@ -150,15 +151,15 @@ pub fn main() !void {
         sphereGO.transform.local2world = modelMatrix;
         sphereGO2.transform.local2world = modelMatrix.mul(&math.Mat4x4.translate(math.vec3(5, 2, 0)));
 
-        for (engine.scene.?.objects.slice()) |*object| {
-            const xMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
-            const yMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
-            const zMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
+        // for (engine.scene.?.objects.slice()) |*object| {
+        //     const xMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
+        //     const yMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
+        //     const zMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
 
-            const motionVec = math.vec3(xMotion, yMotion, zMotion);
+        //     const motionVec = math.vec3(xMotion, yMotion, zMotion);
 
-            object.transform.local2world = object.transform.local2world.mul(&math.Mat4x4.translate(motionVec));
-        }
+        //     object.transform.local2world = object.transform.local2world.mul(&math.Mat4x4.translate(motionVec));
+        // }
 
         if (engine.scene) |scene| try scene.render();
     }
