@@ -46,7 +46,7 @@ pub fn main() !void {
 
     var shader = Shader{
         .vertSource = @embedFile("vert.glsl"),
-        .fragSource = @embedFile("frag.glsl"),
+        .fragSource = @embedFile("two_textures.glsl"),
     };
     try shader.compile();
     defer shader.deinit();
@@ -64,13 +64,15 @@ pub fn main() !void {
     testTex.create();
 
     var testMaterial = Material{ .shader = &shader };
-    try testMaterial.addProp("_Color", Color.red.toVec4());
+    //try testMaterial.addProp("_Color", Color.red.toVec4());
+    try testMaterial.addProp("_Texture2", &brickTex);
     try testMaterial.addProp("_Texture", &testTex);
-    try testMaterial.addProp("_BadProp", engine);
+    //try testMaterial.addProp("_BadProp", engine);
 
     var brickMaterial = Material{ .shader = &shader };
-    try brickMaterial.addProp("_Color", Color.blue.toVec4());
-    try brickMaterial.addProp("_Texture", &brickTex);
+    //try brickMaterial.addProp("_Color", Color.blue.toVec4());
+    try brickMaterial.addProp("_Texture", &testTex);
+    try brickMaterial.addProp("_Texture2", &brickTex);
 
     var motion = math.vec3(0, 0, 0);
     var camOffset = math.vec3(4, 0, 10);
