@@ -15,83 +15,7 @@ pub const Color = extern struct {
 const f32x4 = @Vector(4, f32);
 const u8x4 = @Vector(4, u8);
 
-pub fn init(r: f32, g: f32, b: f32, a: f32) Color {
-    return .{ .r = r, .g = g, .b = b, .a = a };
-}
-
-pub fn setA(self: Color, a: f32) Color {
-    return .{
-        .r = self.r,
-        .g = self.g,
-        .b = self.b,
-        .a = a,
-    };
-}
-
-pub fn multRGB(self: Color, mult: f32) Color {
-    return .{
-        .r = self.r * mult,
-        .g = self.g * mult,
-        .b = self.b * mult,
-        .a = self.a,
-    };
-}
-
-pub fn saturate(self: Color) Color {
-    const min = @min(self.toVec(), vecFromScalar(1));
-    return fromVec(@max(min, vecFromScalar(0)));
-}
-
-pub fn toVec(self: Color) f32x4 {
-    return @bitCast(self);
-}
-
-pub fn fromVec(v: f32x4) Color {
-    return @bitCast(v);
-}
-
-pub fn vecFromScalar(scalar: f32) f32x4 {
-    return @splat(scalar);
-}
-
-pub fn toRGBVec3(self: Color) math.Vec3 {
-    return .{ .v = .{ self.r, self.g, self.b } };
-}
-
-pub fn toVec4(self: Color) math.Vec4 {
-    return @bitCast(self);
-}
-
-pub fn from255(c: Color) Color {
-    return fromVec(toVec(c) / vecFromScalar(255));
-}
-
-pub fn fromU8x4(v: u8x4) Color {
-    return fromVec(@as(f32x4, @floatFromInt(v)) / vecFromScalar(255));
-}
-
-pub fn toU8x4(c: Color) u8x4 {
-    return @as(u8x4, @intFromFloat(toVec(c.saturate()) * vecFromScalar(255)));
-}
-
-const Error = error{
-    HexMustBe6or8CharsLong,
-};
-
-pub fn fromHex(hex: []const u8) !Color {
-    if (hex.len != 8 and hex.len != 6) {
-        if (@inComptime()) {
-            @compileError("Color hex code must be 8 characters long");
-        } else {
-            return Error.HexMustBe6or8CharsLong;
-        }
-    }
-
-    var buf: [4]u8 = undefined;
-    buf[3] = 255; // default alpha to 1
-    _ = try std.fmt.hexToBytes(&buf, hex);
-    return fromU8x4(@bitCast(buf));
-}
+// Color constants
 
 pub const white = init(1, 1, 1, 1);
 pub const black = init(0, 0, 0, 1);
@@ -121,7 +45,91 @@ pub const violet = init(0.5, 0, 1, 1);
 pub const chartreuse = init(0.5, 1, 0, 1);
 pub const lime = init(0.0, 1, 0.5, 1);
 
-// tests
+const Error = error{
+    HexMustBe6or8CharsLong,
+};
+
+// Methods
+
+pub fn init(r: f32, g: f32, b: f32, a: f32) Color {
+    return .{ .r = r, .g = g, .b = b, .a = a };
+}
+
+// modifiers
+
+pub fn setA(self: Color, a: f32) Color {
+    return .{
+        .r = self.r,
+        .g = self.g,
+        .b = self.b,
+        .a = a,
+    };
+}
+
+pub fn multRGB(self: Color, mult: f32) Color {
+    return .{
+        .r = self.r * mult,
+        .g = self.g * mult,
+        .b = self.b * mult,
+        .a = self.a,
+    };
+}
+
+pub fn saturate(self: Color) Color {
+    const min = @min(self.toVec(), vecFromScalar(1));
+    return fromVec(@max(min, vecFromScalar(0)));
+}
+
+// conversion
+
+pub fn fromVec(v: f32x4) Color {
+    return @bitCast(v);
+}
+
+pub fn toVec(self: Color) f32x4 {
+    return @bitCast(self);
+}
+
+pub fn fromU8x4(v: u8x4) Color {
+    return fromVec(@as(f32x4, @floatFromInt(v)) / vecFromScalar(255));
+}
+
+pub fn toU8x4(c: Color) u8x4 {
+    return @as(u8x4, @intFromFloat(toVec(c.saturate()) * vecFromScalar(255)));
+}
+
+pub fn vecFromScalar(scalar: f32) f32x4 {
+    return @splat(scalar);
+}
+
+pub fn toRGBVec3(self: Color) math.Vec3 {
+    return .{ .v = .{ self.r, self.g, self.b } };
+}
+
+pub fn toVec4(self: Color) math.Vec4 {
+    return @bitCast(self);
+}
+
+pub fn from255(c: Color) Color {
+    return fromVec(toVec(c) / vecFromScalar(255));
+}
+
+pub fn fromHex(hex: []const u8) !Color {
+    if (hex.len != 8 and hex.len != 6) {
+        if (@inComptime()) {
+            @compileError("Color hex code must be 8 characters long");
+        } else {
+            return Error.HexMustBe6or8CharsLong;
+        }
+    }
+
+    var buf: [4]u8 = undefined;
+    buf[3] = 255; // default alpha to 1
+    _ = try std.fmt.hexToBytes(&buf, hex);
+    return fromU8x4(@bitCast(buf));
+}
+
+// Tests
 
 const testing = std.testing;
 const isEq = testing.expectEqual;
