@@ -355,7 +355,9 @@ pub const Shader = struct {
 
     const Error = error{
         InvalidUniformName,
+        AttemptingToSetUniformButProgramIsNotBound,
         ShaderCompilationFailed,
+        ShaderLinkingFailed,
         GLError,
     };
 
@@ -397,8 +399,30 @@ pub const Shader = struct {
 
         try glLogError();
 
+        {
+            var isLinked: i32 = 0;
+            gl.getProgramiv(self.program, gl.LINK_STATUS, &isLinked);
+            if (isLinked == gl.FALSE) {
+                var maxLength: i32 = undefined;
+                gl.getProgramiv(self.program, gl.INFO_LOG_LENGTH, &maxLength);
+                var buffer = [1:0]u8{0} ** 256;
+                gl.getProgramInfoLog(self.program, maxLength, &maxLength, &buffer);
+
+                gl.deleteProgram(self.program);
+                self.program = 0;
+
+                return Error.ShaderLinkingFailed;
+            }
+        }
+
         gl.deleteShader(vertShader);
         gl.deleteShader(fragShader);
+    }
+
+    fn checkIfProgramIsBound() bool {
+        var program: i32 = undefined;
+        gl.getIntegerv(gl.CURRENT_PROGRAM, &program);
+        return program > 0;
     }
 
     pub fn bind(self: Self) void {
@@ -424,15 +448,19 @@ pub const Shader = struct {
     }
 
     pub fn setUniformByName(self: Self, name: [:0]const u8, value: anytype) !void {
+        if (!checkIfProgramIsBound()) {
+            return Error.AttemptingToSetUniformButProgramIsNotBound;
+        }
+
         const location = gl.getUniformLocation(self.program, name);
 
         if (location < 0) {
-            // TODO: Make it so I can handle this error and prevent the panic
-            std.debug.panic("Uniform by name of {s} doesn't exist", .{name});
+            std.log.err("Uniform by name of {s} doesn't exist", .{name});
             return Error.InvalidUniformName;
         }
 
         setUniform(location, value);
+
         glLogError() catch |err| {
             std.log.err("Attempting to set uniform '{s}' at location {} with value of type: {}", .{ name, location, @TypeOf(value) });
             return err;
