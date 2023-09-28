@@ -91,7 +91,7 @@ Stream 8:
         ✔ Sligthly improved Readme for the engine @done(23-09-28 16:47)
         ✔ Accepted 2 pull requests from  which tidied up Color and Shapes @done(23-09-28 16:57)
     On stream:
-        ☐ Move stream.todo to zigdown repo
+        ✔ Move stream.todo to zigdown repo @done(23-09-28 16:58)
         ☐ Add gltf model loading
         ☐ Create Objects and Meshes from gltf
         ☐ Load Textures from gltf

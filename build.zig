@@ -23,19 +23,23 @@ pub fn build(b: *std.Build) void {
         .target = exe.target,
         .optimize = exe.optimize,
     });
+
+    // mach
     exe.addModule("mach", @import("mach").module(mach_dep.builder, optimize, target));
 
+    // gl
     exe.addModule("gl", b.createModule(.{
         .source_file = .{ .path = "libs/gl41.zig" },
     }));
 
+    // zgltf
+    //exe.addModule("zgltf", b.createModule(.{ @import("zgltf").module(b));
+
     // Include C
 
     exe.linkLibC();
-    exe.addCSourceFile(.{
-        .file = .{ .path = "libs/stb_image.c" },
-        .flags = &.{},
-    });
+    exe.addCSourceFile(.{ .file = .{ .path = "libs/stb_image.c" }, .flags = &.{} });
+    exe.addCSourceFile(.{ .file = .{ .path = "libs/cgltf.c" }, .flags = &.{} });
 
     exe.addIncludePath(.{ .path = "libs" });
 

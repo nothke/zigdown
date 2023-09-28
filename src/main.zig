@@ -2,6 +2,7 @@ const std = @import("std");
 const glfw = @import("mach-glfw");
 const gl = @import("gl");
 const c = @import("c.zig");
+const gltf = @import("zcgltf.zig");
 
 const _engine = @import("engine.zig");
 const Engine = _engine.Engine;
@@ -98,6 +99,37 @@ pub fn main() !void {
     //         _ = try engine.scene.?.addObject(&quadMesh, &brickMaterial);
     //     }
     // }
+
+    // GLTF
+    var data = try gltf.parseFile(.{}, "res/testcube.gltf");
+    try gltf.loadBuffers(.{}, data, "res/testcube.gltf");
+
+    for (data.meshes.?[0..data.meshes_count]) |mesh| {
+        for (mesh.primitives[0..mesh.primitives_count]) |primitive| {
+            var gameMesh = Mesh.init(alloc);
+
+            for (primitive.attributes[0..primitive.attributes_count]) |attribute| {
+                var name = std.mem.sliceTo(attribute.name.?, 0);
+                if (std.mem.eql(u8, name, "POSITION")) {
+                    std.log.info("Found position!", .{});
+
+                    var accessor = attribute.data;
+                    const vertexCount = accessor.count;
+                    try gameMesh.vertices.ensureTotalCapacity(vertexCount);
+                    //accessor
+                    var buffer = accessor.buffer_view.?.buffer;
+
+                    var vec = @as(*@Vector(3, f32), @ptrCast(@alignCast(buffer.data.?))).*;
+
+                    std.log.info("vec: {}", .{vec});
+
+                    for (0..vertexCount) |vi| {
+                        _ = vi;
+                    }
+                }
+            }
+        }
+    }
 
     var lastFrameTime = glfw.getTime();
 
