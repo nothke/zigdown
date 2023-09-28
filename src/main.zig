@@ -118,13 +118,12 @@ pub fn main() !void {
                     try gameMesh.vertices.ensureTotalCapacity(vertexCount);
                     //accessor
                     var buffer = accessor.buffer_view.?.buffer;
-
-                    var vec = @as(*@Vector(3, f32), @ptrCast(@alignCast(buffer.data.?))).*;
-
-                    std.log.info("vec: {}", .{vec});
+                    var vertData = @as([*]@Vector(3, f32), @ptrCast(@alignCast(buffer.data.?)))[0..vertexCount];
 
                     for (0..vertexCount) |vi| {
-                        _ = vi;
+                        var vec = vertData[vi];
+                        std.log.info("vec: {}", .{vec});
+                        try gameMesh.vertices.append(Vertex{ .position = .{ .v = vec } });
                     }
                 }
             }
