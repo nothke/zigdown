@@ -10,9 +10,9 @@
             .url = "https://pkg.machengine.org/mach/45b23264da2444f3318f794975bbc8a330797547.tar.gz",
             .hash = "12209412329d43628575bb550d90d00757926f0718310f61b82acc35f85afb98bd6f",
         },
-        // .zgltf = .{
-        //     .url = "https://github.com/kooparse/zgltf/archive/a4fb829c11067182e909425bfedffe76da977fb8.tar.gz",
-        //     .hash = "122095898ebea57b59b7776b342c0a998d512b7f33848c3e9bc59420d8363643a5ce",
-        // },
+        .zgltf = .{
+            .url = "https://github.com/kooparse/zgltf/archive/a4fb829c11067182e909425bfedffe76da977fb8.tar.gz",
+            .hash = "122095898ebea57b59b7776b342c0a998d512b7f33848c3e9bc59420d8363643a5ce",
+        },
     },
 }

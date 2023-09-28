@@ -10,6 +10,8 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
+    // allows @embedFile() from res
+    exe.main_pkg_path = .{ .path = "." };
 
     // Use mach-glfw
     const glfw_dep = b.dependency("mach_glfw", .{
@@ -26,14 +28,16 @@ pub fn build(b: *std.Build) void {
 
     // mach
     exe.addModule("mach", @import("mach").module(mach_dep.builder, optimize, target));
+    // zgltf
+    exe.addModule("zgltf", b.dependency("zgltf", .{
+        .target = target,
+        .optimize = optimize,
+    }).module("zgltf"));
 
     // gl
     exe.addModule("gl", b.createModule(.{
         .source_file = .{ .path = "libs/gl41.zig" },
     }));
-
-    // zgltf
-    //exe.addModule("zgltf", b.createModule(.{ @import("zgltf").module(b));
 
     // Include C
 
