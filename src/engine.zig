@@ -361,26 +361,6 @@ pub const Shader = struct {
         GLError,
     };
 
-    fn logShaderError(shader: u32) !void {
-        var isCompiled: i32 = 0;
-        gl.getShaderiv(shader, gl.COMPILE_STATUS, &isCompiled);
-
-        if (isCompiled == gl.FALSE) {
-            var maxLength: i32 = 0;
-            gl.getShaderiv(shader, gl.INFO_LOG_LENGTH, &maxLength);
-
-            const errorLogSize: usize = 512;
-            var errorLog = [1:0]u8{0} ** errorLogSize;
-            gl.getShaderInfoLog(shader, errorLogSize, &maxLength, &errorLog);
-
-            gl.deleteShader(shader);
-
-            std.log.err("\nShader compilation failed:\n{s}", .{errorLog[0..@intCast(maxLength)]});
-
-            return Error.ShaderCompilationFailed;
-        }
-    }
-
     pub fn compile(self: *Self) !void {
         var vertShader = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vertShader, 1, &self.vertSource.ptr, null);
@@ -433,7 +413,11 @@ pub const Shader = struct {
         gl.deleteProgram(self.program);
     }
 
-    pub fn setUniform(location: i32, value: anytype) void {
+    pub fn setUniform(location: i32, value: anytype) !void {
+        if (!checkIfProgramIsBound()) {
+            return Error.AttemptingToSetUniformButProgramIsNotBound;
+        }
+
         const T = @TypeOf(value);
 
         switch (T) {
@@ -448,10 +432,6 @@ pub const Shader = struct {
     }
 
     pub fn setUniformByName(self: Self, name: [:0]const u8, value: anytype) !void {
-        if (!checkIfProgramIsBound()) {
-            return Error.AttemptingToSetUniformButProgramIsNotBound;
-        }
-
         const location = gl.getUniformLocation(self.program, name);
 
         if (location < 0) {
@@ -459,12 +439,32 @@ pub const Shader = struct {
             return Error.InvalidUniformName;
         }
 
-        setUniform(location, value);
+        try setUniform(location, value);
 
         glLogError() catch |err| {
             std.log.err("Attempting to set uniform '{s}' at location {} with value of type: {}", .{ name, location, @TypeOf(value) });
             return err;
         };
+    }
+
+    fn logShaderError(shader: u32) !void {
+        var isCompiled: i32 = 0;
+        gl.getShaderiv(shader, gl.COMPILE_STATUS, &isCompiled);
+
+        if (isCompiled == gl.FALSE) {
+            var maxLength: i32 = 0;
+            gl.getShaderiv(shader, gl.INFO_LOG_LENGTH, &maxLength);
+
+            const errorLogSize: usize = 512;
+            var errorLog = [1:0]u8{0} ** errorLogSize;
+            gl.getShaderInfoLog(shader, errorLogSize, &maxLength, &errorLog);
+
+            gl.deleteShader(shader);
+
+            std.log.err("\nShader compilation failed:\n{s}", .{errorLog[0..@intCast(maxLength)]});
+
+            return Error.ShaderCompilationFailed;
+        }
     }
 };
 
