@@ -3,6 +3,7 @@ const glfw = @import("mach-glfw");
 const gl = @import("gl");
 const c = @import("c.zig");
 const gltf = @import("zcgltf.zig");
+const zgltf = @import("zgltf");
 
 const _engine = @import("engine.zig");
 const Engine = _engine.Engine;
@@ -99,31 +100,63 @@ pub fn main() !void {
     //         _ = try engine.scene.?.addObject(&quadMesh, &brickMaterial);
     //     }
     // }
-
+    const use_zgltf = true;
     // GLTF
-    var data = try gltf.parseFile(.{}, "res/testcube.gltf");
-    try gltf.loadBuffers(.{}, data, "res/testcube.gltf");
+    if (!use_zgltf) {
+        var data = try gltf.parseFile(.{}, "res/testcube.gltf");
+        try gltf.loadBuffers(.{}, data, "res/testcube.gltf");
 
-    for (data.meshes.?[0..data.meshes_count]) |mesh| {
-        for (mesh.primitives[0..mesh.primitives_count]) |primitive| {
-            var gameMesh = Mesh.init(alloc);
+        for (data.meshes.?[0..data.meshes_count]) |mesh| {
+            for (mesh.primitives[0..mesh.primitives_count]) |primitive| {
+                var gameMesh = Mesh.init(alloc);
 
-            for (primitive.attributes[0..primitive.attributes_count]) |attribute| {
-                var name = std.mem.sliceTo(attribute.name.?, 0);
-                if (std.mem.eql(u8, name, "POSITION")) {
-                    std.log.info("Found position!", .{});
+                for (primitive.attributes[0..primitive.attributes_count]) |attribute| {
+                    var name = std.mem.sliceTo(attribute.name.?, 0);
+                    if (std.mem.eql(u8, name, "POSITION")) {
+                        std.log.info("Found position!", .{});
 
-                    var accessor = attribute.data;
-                    const vertexCount = accessor.count;
-                    try gameMesh.vertices.ensureTotalCapacity(vertexCount);
-                    //accessor
-                    var buffer = accessor.buffer_view.?.buffer;
-                    var vertData = @as([*]@Vector(3, f32), @ptrCast(@alignCast(buffer.data.?)))[0..vertexCount];
+                        var accessor = attribute.data;
+                        const vertexCount = accessor.count;
+                        try gameMesh.vertices.ensureTotalCapacity(vertexCount);
+                        //accessor
+                        var buffer = accessor.buffer_view.?.buffer;
+                        var vertData = @as([*]@Vector(3, f32), @ptrCast(@alignCast(buffer.data.?)))[0..vertexCount];
 
-                    for (0..vertexCount) |vi| {
-                        var vec = vertData[vi];
-                        std.log.info("vec: {}", .{vec});
-                        try gameMesh.vertices.append(Vertex{ .position = .{ .v = vec } });
+                        for (0..vertexCount) |vi| {
+                            var vec = vertData[vi];
+                            std.log.info("vec: {}", .{vec});
+                            try gameMesh.vertices.append(Vertex{ .position = .{ .v = vec } });
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        var zgltf_obj = zgltf.init(alloc);
+        defer zgltf_obj.deinit();
+        const gltf_source = @embedFile("../res/testcube.gltf");
+        try zgltf_obj.parse(gltf_source);
+        var data = zgltf_obj.data;
+        zgltf_obj.debugPrint();
+        var vertices = std.ArrayList(f32).init(alloc);
+        defer vertices.deinit();
+        for (data.meshes.items) |mesh| {
+            for (mesh.primitives.items) |primitive| {
+                for (primitive.attributes.items) |attribute| {
+                    if (attribute == .position) {
+                        const accessor = zgltf_obj.data.accessors.items[attribute.position];
+
+                        std.log.info("Found position! comp_type={s} type={s}", .{ @tagName(accessor.component_type), @tagName(accessor.type) });
+                        std.log.info("TODO - get data", .{});
+
+                        // TODO - get data. the following is from the example on
+                        // the zgltf readme. not sure how it should work. i tried
+                        // passing 'gltf_source' for the 'bin' param below, but
+                        // that isn't correct.  'bin' seems to expect some kind of
+                        // binary file.
+                        //
+                        // zgltf_obj.getDataFromBufferView(f32, &vertices, accessor, bin);
+
                     }
                 }
             }
