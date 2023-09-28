@@ -1,0 +1,98 @@
+Stream 1:
+    ✔ Intro to zig @done(23-09-24 16:03)
+
+Stream 2:
+    Go over a few cool zig features:
+        ✔ anytype @done(23-09-20 19:00)
+        ✔ inline for @done(23-09-20 19:00)
+        ✔ comptime @done(23-09-20 19:00)
+        ✔ packed structs (and bools) @done(23-09-20 19:00)
+        ✔ arbitrary size ints @done(23-09-20 19:00)
+
+
+Stream 3:
+    Go over a few cool zig features:
+        ✔ |captures|, multi-element for loop @done(23-09-21 21:49)
+        ✔ ? - optionals @done(23-09-21 22:08)
+        ✔ pointers @done(23-09-21 22:41)
+        ✔ ! - errors @done(23-09-21 23:02)
+        ✔ allocators @done(23-09-21 23:40)
+        ✔ no ctors/dtors, but defer! @done(23-09-22 00:04)
+        ✔ Fixed buffer allocator @done(23-09-22 00:18)
+        ✔ GPA - general purpose allocator, tracks memory leaks! @done(23-09-22 00:18)
+        ✔ no operator overloads @done(23-09-22 00:27)
+        ✔ vectors (mathematical) @done(23-09-22 01:08)
+
+Stream 4:
+    Before stream:
+        ✔ Show off Shakedown @done(23-09-22 20:42)
+        ✔ Had to update zls to support package autocomplete @done(23-09-22 21:12)
+    On stream:
+        ✔ Build zls with release fast @done(23-09-22 21:30)
+        ✔ Show how packages can be used with mach-glfw @done(23-09-22 21:12)
+        Start making a new engine!:
+            ✔ Clone opengl example @done(23-09-22 21:30)
+            ✔ Draw a triangle! @done(23-09-22 22:31)
+            ✔ Create abstractions for Mesh and Shader @done(23-09-23 00:59)
+            ✔ Wrap everything into an Engine @done(23-09-23 00:59)
+            ✔ Model and view matrices @done(23-09-23 03:25)
+            ✔ Camera, and projection matrices @done(23-09-23 03:25)
+            ✔ Math library @done(23-09-23 03:26)
+
+Stream 5:
+    Before stream:
+        Known problems:
+            ☐ Perspective matrix near and far plane ..?
+    On stream:
+        ✔ Window parameters @done(23-09-24 17:44)
+        Comptime warmup:
+            ✔ setUniform() as a comptime that takes in i32, f32, vec2, vec3, vec4, Mat4x4 @done(23-09-24 18:13)
+            ✔ Fetch uniforms to be able to set them by name (instead by uniform number) @done(23-09-24 18:21)
+        OpenGL errors:
+            ✔ Handle OpenGL errors @done(23-09-24 19:01)
+            ✔ Handle shader compilation errors @done(23-09-24 18:44)
+        Lighting the cube:
+            ✔ Vertex type with position, uv, normal, color @done(23-09-24 20:24)
+            ✔ Add normals to cube @done(23-09-24 21:43)
+            ✔ Render with lambertian lighting @done(23-09-24 22:31)
+        Input:
+            ✔ Decouple Input from Engine @done(23-09-24 23:36)
+            ✔ Add instantaneous key callbacks, down, up @done(23-09-24 23:36)
+        Object and scene abstraction:
+            ✔ Model matrices @done(23-09-25 00:12)
+            ✔ GameObjects @done(23-09-25 00:49)
+            ✔ Scene abstraction @done(23-09-25 00:49)
+        ✔ Fullscreen borderless window @done(23-09-25 01:35)
+
+
+Stream 6:
+    Before stream:
+        ✔ Added vsync @done(23-09-26 19:18)
+        ✔ Added Color struct @done(23-09-26 19:18)
+    Warmup:
+        ✔ Color from hex at compile time @done(23-09-26 19:18)
+    Textures:
+        ✔ ~Find ziggified stb_image, or use C?~ Used C std_image directly @done(23-09-26 20:43)
+        ✔ Load textures into buffer @done(23-09-26 20:43)
+        ✔ Create OpenGL texture buffer @done(23-09-26 20:44)
+        ✘ Set texture as integer to shader @cancelled(23-09-26 20:44)
+
+Stream 7:
+    ✔ Figure out why the texture doesn't render @done(23-09-26 23:48)
+    ✔ Texture struct abstraction @done(23-09-27 00:09)
+    ✔ Test rendering multiple objects with different textures @done(23-09-27 02:51)
+    ✔ Test rendering multiple textures in a shader @done(23-09-27 03:12)
+    ✔ Shapes should append to end of Mesh @done(23-09-27 03:42)
+    ✔ Cleanup and optimize Sphere mesh @done(23-09-27 03:42)
+
+Stream 8:
+    Before stream:
+        ✔ Added summary and ASCII painting in zig c example @done(23-09-28 16:54)
+        ✔ Sligthly improved Readme for the engine @done(23-09-28 16:47)
+        ✔ Accepted 2 pull requests from  which tidied up Color and Shapes @done(23-09-28 16:57)
+    On stream:
+        ☐ Move stream.todo to zigdown repo
+        ☐ Add gltf model loading
+        ☐ Create Objects and Meshes from gltf
+        ☐ Load Textures from gltf
+        ☐ Abstract gltf loading with AssetManager
