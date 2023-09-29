@@ -95,5 +95,10 @@ Stream 8:
         ✔ Add gltf model loading @done(23-09-28 18:39)
         ✘ Create Objects and Meshes from gltf @cancelled(23-09-28 18:39)
         ✔ Created single mesh and pushed some vertices @done(23-09-28 18:39)
-        ☐ Load Textures from gltf
-        ☐ Abstract gltf loading with AssetManager
+        
+
+Stream 9:
+    ✔ Load a mesh with vertices and indices @done(23-09-29 03:14)
+    ☐ Load multiple objects
+    ☐ Load Textures from gltf
+    ☐ Abstract gltf loading with AssetManager

@@ -100,16 +100,20 @@ pub fn main() !void {
     //         _ = try engine.scene.?.addObject(&quadMesh, &brickMaterial);
     //     }
     // }
-    const use_zgltf = true;
+
     // GLTF
+
+    const use_zgltf = comptime false;
+
+    var gameMesh = Mesh.init(alloc);
+    defer gameMesh.deinit();
+
     if (!use_zgltf) {
         var data = try gltf.parseFile(.{}, "res/testcube.gltf");
         try gltf.loadBuffers(.{}, data, "res/testcube.gltf");
 
         for (data.meshes.?[0..data.meshes_count]) |mesh| {
             for (mesh.primitives[0..mesh.primitives_count]) |primitive| {
-                var gameMesh = Mesh.init(alloc);
-
                 for (primitive.attributes[0..primitive.attributes_count]) |attribute| {
                     var name = std.mem.sliceTo(attribute.name.?, 0);
                     if (std.mem.eql(u8, name, "POSITION")) {
@@ -120,12 +124,44 @@ pub fn main() !void {
                         try gameMesh.vertices.ensureTotalCapacity(vertexCount);
                         //accessor
                         var buffer = accessor.buffer_view.?.buffer;
-                        var vertData = @as([*]@Vector(3, f32), @ptrCast(@alignCast(buffer.data.?)))[0..vertexCount];
+                        var bufferView = accessor.buffer_view.?;
+                        _ = bufferView;
+                        var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(buffer.data)))[0..vertexCount];
+
+                        // const data_addr = @as([*]const u8, @ptrCast(buffer.data)) +
+                        //     accessor.offset + bufferView.offset;
+
+                        // const slice = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
+
+                        // for (slice) |vertex| {}
 
                         for (0..vertexCount) |vi| {
-                            var vec = vertData[vi];
+                            var vec = @Vector(3, f32){ vertData[vi][0], vertData[vi][1], vertData[vi][2] };
                             std.log.info("vec: {}", .{vec});
                             try gameMesh.vertices.append(Vertex{ .position = .{ .v = vec } });
+                        }
+                    }
+                }
+
+                {
+                    const indexAccessor = primitive.indices.?;
+                    var indexBufferView = indexAccessor.buffer_view.?;
+                    var buffer = indexBufferView.buffer;
+                    const indexCount = indexAccessor.count;
+                    try gameMesh.indices.ensureTotalCapacity(indexCount);
+
+                    std.log.info("index component type is: {s}, count: {}", .{ @tagName(indexAccessor.component_type), indexCount });
+                    if (indexAccessor.component_type == .r_16u) {
+                        std.log.info("buffer view offset: {}, size: {}, stride: {}", .{ indexBufferView.offset, indexBufferView.size, indexBufferView.stride });
+
+                        const indexData = @as([*]const u8, @ptrCast(buffer.data)) +
+                            indexAccessor.offset + indexBufferView.offset;
+
+                        for (0..indexCount) |ic| {
+                            const start = ic * 2;
+                            var vi = std.mem.readIntNative(u16, indexData[start..][0..2]);
+                            std.log.info("first: {}", .{vi});
+                            try gameMesh.indices.append(vi);
                         }
                     }
                 }
@@ -149,6 +185,15 @@ pub fn main() !void {
                         std.log.info("Found position! comp_type={s} type={s}", .{ @tagName(accessor.component_type), @tagName(accessor.type) });
                         std.log.info("TODO - get data", .{});
 
+                        const bvi = accessor.buffer_view.?;
+
+                        const bi = data.buffer_views.items[bvi].buffer;
+                        const buffer = data.buffers.items[bi];
+
+                        const uri = buffer.uri.?;
+
+                        std.log.info("first item: {}, length: {}", .{ uri.len, buffer.byte_length });
+
                         // TODO - get data. the following is from the example on
                         // the zgltf readme. not sure how it should work. i tried
                         // passing 'gltf_source' for the 'bin' param below, but
@@ -162,6 +207,14 @@ pub fn main() !void {
             }
         }
     }
+
+    try gameMesh.create();
+
+    for (gameMesh.vertices.items, 0..) |v, i| {
+        std.log.info("pos {}: {}", .{ i, v.position });
+    }
+
+    _ = try engine.scene.?.addObject(&gameMesh, &brickMaterial);
 
     var lastFrameTime = glfw.getTime();
 
