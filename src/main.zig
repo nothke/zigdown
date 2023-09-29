@@ -116,6 +116,23 @@ pub fn main() !void {
         var data = try gltf.parseFile(.{}, "res/testcube.gltf");
         try gltf.loadBuffers(.{}, data, "res/testcube.gltf");
 
+        // Materials
+
+        for (data.materials.?[0..data.materials_count]) |material| {
+            const view = material.pbr_metallic_roughness.base_color_texture;
+            _ = view;
+        }
+
+        // Textures
+
+        for (data.textures.?[0..data.textures_count]) |texture| {
+            const image = texture.image.?;
+            const view = image.buffer_view.?;
+            _ = view;
+        }
+
+        // Meshes
+
         for (data.meshes.?[0..data.meshes_count]) |mesh| {
             for (mesh.primitives[0..mesh.primitives_count]) |primitive| {
                 std.debug.assert(primitive.attributes_count > 0);

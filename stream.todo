@@ -98,7 +98,11 @@ Stream 8:
         
 
 Stream 9:
-    ✔ Load a mesh with vertices and indices @done(23-09-29 03:14)
+    ✔ gltf: Load a mesh with vertices and indices @done(23-09-29 03:14)
+    ✔ gltf: Load normals and uvs @done(23-09-29 04:20)
+
+Stream 10:
+    ☐ Load a texture
+    ☐ Abstract gltf loading with AssetManager
     ☐ Load multiple objects
     ☐ Load Textures from gltf
-    ☐ Abstract gltf loading with AssetManager
