@@ -129,14 +129,13 @@ pub fn main() !void {
 
                     std.log.info("-- start of attribute: {s}", .{@tagName(attribute.type)});
 
+                    const data_addr = @as([*]const u8, @ptrCast(buffer.data)) + accessor.offset + bufferView.offset;
+
                     if (attribute.type == .position) {
                         std.log.info("Found position!", .{});
 
                         //accessor
-                        var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(buffer.data)))[0..vertexCount];
-
-                        // const data_addr = @as([*]const u8, @ptrCast(buffer.data)) +
-                        //     accessor.offset + bufferView.offset;
+                        var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
 
                         // const slice = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
 
@@ -148,7 +147,7 @@ pub fn main() !void {
                             gameMesh.vertices.items[vi].position = .{ .v = vertData[vi] };
                         }
                     } else if (attribute.type == .normal) {
-                        var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(buffer.data)))[0..vertexCount];
+                        var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
                         for (0..vertexCount) |vi| {
                             var vec = @Vector(3, f32){ vertData[vi][0], vertData[vi][1], vertData[vi][2] };
                             std.log.info("vec: {d:.2}", .{vec});
