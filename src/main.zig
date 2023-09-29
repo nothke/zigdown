@@ -114,20 +114,25 @@ pub fn main() !void {
 
         for (data.meshes.?[0..data.meshes_count]) |mesh| {
             for (mesh.primitives[0..mesh.primitives_count]) |primitive| {
+                std.debug.assert(primitive.attributes_count > 0);
+
+                const vertexCount = primitive.attributes[0].data.count;
+                try gameMesh.vertices.ensureTotalCapacity(vertexCount);
+                try gameMesh.vertices.appendNTimes(.{}, vertexCount);
+
                 for (primitive.attributes[0..primitive.attributes_count]) |attribute| {
                     //var name = std.mem.sliceTo(attribute.name.?, 0);
 
-                    var accessor = attribute.data;
-                    const vertexCount = accessor.count;
-                    try gameMesh.vertices.ensureTotalCapacity(vertexCount);
+                    const accessor = attribute.data;
+                    const bufferView = accessor.buffer_view.?;
+                    const buffer = bufferView.buffer;
+
+                    std.log.info("-- start of attribute: {s}", .{@tagName(attribute.type)});
 
                     if (attribute.type == .position) {
                         std.log.info("Found position!", .{});
 
                         //accessor
-                        var buffer = accessor.buffer_view.?.buffer;
-                        var bufferView = accessor.buffer_view.?;
-                        _ = bufferView;
                         var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(buffer.data)))[0..vertexCount];
 
                         // const data_addr = @as([*]const u8, @ptrCast(buffer.data)) +
@@ -138,9 +143,16 @@ pub fn main() !void {
                         // for (slice) |vertex| {}
 
                         for (0..vertexCount) |vi| {
+                            //std.log.info("vec: {}", .{vec});
+                            std.log.info("vec: {d:.2}", .{vertData[vi]});
+                            gameMesh.vertices.items[vi].position = .{ .v = vertData[vi] };
+                        }
+                    } else if (attribute.type == .normal) {
+                        var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(buffer.data)))[0..vertexCount];
+                        for (0..vertexCount) |vi| {
                             var vec = @Vector(3, f32){ vertData[vi][0], vertData[vi][1], vertData[vi][2] };
-                            std.log.info("vec: {}", .{vec});
-                            try gameMesh.vertices.append(Vertex{ .position = .{ .v = vec } });
+                            std.log.info("vec: {d:.2}", .{vec});
+                            gameMesh.vertices.items[vi].normal = .{ .v = vec };
                         }
                     }
                 }
@@ -162,7 +174,7 @@ pub fn main() !void {
                         for (0..indexCount) |ic| {
                             const start = ic * 2;
                             var vi = std.mem.readIntNative(u16, indexData[start..][0..2]);
-                            std.log.info("first: {}", .{vi});
+                            //std.log.info("first: {}", .{vi});
                             try gameMesh.indices.append(vi);
                         }
                     }
@@ -211,10 +223,6 @@ pub fn main() !void {
     }
 
     try gameMesh.create();
-
-    for (gameMesh.vertices.items, 0..) |v, i| {
-        std.log.info("pos {}: {}", .{ i, v.position });
-    }
 
     _ = try engine.scene.?.addObject(&gameMesh, &brickMaterial);
 
