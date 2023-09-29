@@ -115,13 +115,15 @@ pub fn main() !void {
         for (data.meshes.?[0..data.meshes_count]) |mesh| {
             for (mesh.primitives[0..mesh.primitives_count]) |primitive| {
                 for (primitive.attributes[0..primitive.attributes_count]) |attribute| {
-                    var name = std.mem.sliceTo(attribute.name.?, 0);
-                    if (std.mem.eql(u8, name, "POSITION")) {
+                    //var name = std.mem.sliceTo(attribute.name.?, 0);
+
+                    var accessor = attribute.data;
+                    const vertexCount = accessor.count;
+                    try gameMesh.vertices.ensureTotalCapacity(vertexCount);
+
+                    if (attribute.type == .position) {
                         std.log.info("Found position!", .{});
 
-                        var accessor = attribute.data;
-                        const vertexCount = accessor.count;
-                        try gameMesh.vertices.ensureTotalCapacity(vertexCount);
                         //accessor
                         var buffer = accessor.buffer_view.?.buffer;
                         var bufferView = accessor.buffer_view.?;
