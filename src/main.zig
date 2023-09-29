@@ -20,6 +20,10 @@ const math = @import("mach").math;
 
 const Shapes = @import("shapes.zig");
 
+fn flipZ(v: [3]f32) [3]f32 {
+    return .{ v[0], v[1], -v[2] };
+}
+
 pub fn main() !void {
     var engine = Engine{};
     try engine.init(.{
@@ -132,26 +136,22 @@ pub fn main() !void {
                     const data_addr = @as([*]const u8, @ptrCast(buffer.data)) + accessor.offset + bufferView.offset;
 
                     if (attribute.type == .position) {
-                        std.log.info("Found position!", .{});
-
-                        //accessor
                         var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
-
-                        // const slice = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
-
-                        // for (slice) |vertex| {}
-
                         for (0..vertexCount) |vi| {
-                            //std.log.info("vec: {}", .{vec});
-                            std.log.info("vec: {d:.2}", .{vertData[vi]});
-                            gameMesh.vertices.items[vi].position = .{ .v = vertData[vi] };
+                            //std.log.info("vec: {d:.2}", .{vertData[vi]});
+                            gameMesh.vertices.items[vi].position = .{ .v = flipZ(vertData[vi]) };
                         }
                     } else if (attribute.type == .normal) {
                         var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
                         for (0..vertexCount) |vi| {
-                            var vec = @Vector(3, f32){ vertData[vi][0], vertData[vi][1], vertData[vi][2] };
-                            std.log.info("vec: {d:.2}", .{vec});
-                            gameMesh.vertices.items[vi].normal = .{ .v = vec };
+                            //std.log.info("vec: {d:.2}", .{vertData[vi]});
+                            gameMesh.vertices.items[vi].normal = .{ .v = flipZ(vertData[vi]) };
+                        }
+                    } else if (attribute.type == .texcoord) {
+                        var vertData = @as([*]const [2]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
+                        for (0..vertexCount) |vi| {
+                            //std.log.info("vec: {d:.2}", .{vertData[vi]});
+                            gameMesh.vertices.items[vi].uv = .{ .v = vertData[vi] };
                         }
                     }
                 }
