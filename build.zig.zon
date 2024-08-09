@@ -1,6 +1,7 @@
 .{
     .name = "zigdown",
     .version = "0.0.1",
+    .minimum_zig_version = "0.13.0",
     .dependencies = .{
         .mach_glfw = .{
             .url = "https://pkg.machengine.org/mach-glfw/321efd4065b57e31d8ab0bce720852c1d680d443.tar.gz",
@@ -14,5 +15,10 @@
             .url = "https://github.com/kooparse/zgltf/archive/a4fb829c11067182e909425bfedffe76da977fb8.tar.gz",
             .hash = "122095898ebea57b59b7776b342c0a998d512b7f33848c3e9bc59420d8363643a5ce",
         },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
     },
 }
