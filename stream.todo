@@ -72,7 +72,7 @@ Stream 6:
     Warmup:
         ✔ Color from hex at compile time @done(23-09-26 19:18)
     Textures:
-        ✔ ~Find ziggified stb_image, or use C?~ Used C std_image directly @done(23-09-26 20:43)
+        ✔ ~Find ziggified stb_image, or use C?~ Used C stb_image directly @done(23-09-26 20:43)
         ✔ Load textures into buffer @done(23-09-26 20:43)
         ✔ Create OpenGL texture buffer @done(23-09-26 20:44)
         ✘ Set texture as integer to shader @cancelled(23-09-26 20:44)

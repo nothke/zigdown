@@ -102,7 +102,11 @@ pub const Engine = struct {
         gl.enable(gl.CULL_FACE);
     }
 
-    pub fn deinit(self: Self) void {
+    pub fn deinit(self: *Self) void {
+        if (self.scene) |*scene| {
+            scene.deinit();
+        }
+
         if (self.window) |window| {
             window.destroy();
         }
@@ -110,10 +114,10 @@ pub const Engine = struct {
         glfw.terminate();
     }
 
-    pub fn createScene(self: *Self) void {
-        self.scene = Scene{
-            .objects = .{},
-        };
+    pub fn createScene(self: *Self) *Scene {
+        self.scene = Scene.init();
+
+        return &self.scene.?;
     }
 
     fn toFloat01(byte: u8) f32 {
@@ -238,6 +242,17 @@ pub const Object = struct {
 
 pub const Scene = struct {
     objects: std.BoundedArray(Object, 1024),
+
+    pub fn init() Scene {
+        return Scene{
+            .objects = .{},
+        };
+    }
+
+    pub fn deinit(self: *Scene) void {
+        _ = self; // autofix
+        // TODO
+    }
 
     pub fn addObject(self: *Scene, mesh: *Mesh, material: *Material) !*Object {
         const object = try self.objects.addOne();

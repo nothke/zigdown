@@ -88,19 +88,22 @@ pub fn main() !void {
 
     var wireframe = false;
 
-    engine.createScene();
+    const scene = engine.createScene();
 
-    var sphereGO = try engine.scene.?.addObject(&sphereMesh, &testMaterial);
-    var sphereGO2 = try engine.scene.?.addObject(&sphereMesh, &brickMaterial);
+    var sphereGO = try scene.addObject(&sphereMesh, &testMaterial);
+    var sphereGO2 = try scene.addObject(&sphereMesh, &brickMaterial);
 
-    // for (0..200) |i| {
-    //     _ = i;
-    //     if (pcg.random().boolean()) {
-    //         _ = try engine.scene.?.addObject(&quadMesh, &testMaterial);
-    //     } else {
-    //         _ = try engine.scene.?.addObject(&quadMesh, &brickMaterial);
-    //     }
-    // }
+    {
+        var pcg = std.Random.Pcg.init(54);
+
+        for (0..200) |_| {
+            if (pcg.random().boolean()) {
+                _ = try scene.addObject(&quadMesh, &testMaterial);
+            } else {
+                _ = try scene.addObject(&quadMesh, &brickMaterial);
+            }
+        }
+    }
 
     // GLTF
 
@@ -238,7 +241,7 @@ pub fn main() !void {
 
     try gameMesh.create();
 
-    _ = try engine.scene.?.addObject(&gameMesh, &brickMaterial);
+    _ = try scene.addObject(&gameMesh, &brickMaterial);
 
     var lastFrameTime = glfw.getTime();
 
@@ -298,7 +301,7 @@ pub fn main() !void {
         //     object.transform.local2world = object.transform.local2world.mul(&math.Mat4x4.translate(motionVec));
         // }
 
-        if (engine.scene) |scene| try scene.render();
+        try scene.render();
     }
 }
 
