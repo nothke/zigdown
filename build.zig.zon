@@ -4,16 +4,12 @@
     .minimum_zig_version = "0.13.0",
     .dependencies = .{
         .mach_glfw = .{
-            .url = "https://pkg.machengine.org/mach-glfw/321efd4065b57e31d8ab0bce720852c1d680d443.tar.gz",
-            .hash = "122002e355cf42b8d257efc95229c9ee6be4cca189c1718f86179cb7c21225beeb75",
-        },
-        .mach = .{
-            .url = "https://pkg.machengine.org/mach/45b23264da2444f3318f794975bbc8a330797547.tar.gz",
-            .hash = "12209412329d43628575bb550d90d00757926f0718310f61b82acc35f85afb98bd6f",
+            .url = "https://pkg.machengine.org/mach-glfw/fb4ae48540454270ab969c8c645bbc6eff3c2dfb.tar.gz",
+            .hash = "12201ae68707aefe54ffb9d8c64721d4a2ac36186f8bd390e4f670033fec6737664a",
         },
         .zgltf = .{
-            .url = "https://github.com/kooparse/zgltf/archive/a4fb829c11067182e909425bfedffe76da977fb8.tar.gz",
-            .hash = "122095898ebea57b59b7776b342c0a998d512b7f33848c3e9bc59420d8363643a5ce",
+            .url = "https://github.com/kooparse/zgltf/archive/17fb60b270fa25b3e07b7b3cdb253f86747f9616.tar.gz",
+            .hash = "1220ff2dbebeb83461da67b185d994ae61ebcea747c1bfbfb48b23c8e456cc53ea83",
         },
     },
     .paths = .{

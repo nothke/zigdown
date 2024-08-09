@@ -16,7 +16,7 @@ const Material = _engine.Material;
 
 const Color = @import("color.zig");
 
-const math = @import("mach").math;
+const math = @import("../libs/math/main.zig");
 
 const Shapes = @import("shapes.zig");
 
