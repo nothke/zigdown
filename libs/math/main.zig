@@ -150,6 +150,7 @@ pub const degreesToRadians = std.math.degreesToRadians;
 pub const radiansToDegrees = std.math.radiansToDegrees;
 pub const maxInt = std.math.maxInt;
 pub const lerp = std.math.lerp;
+pub const tan = std.math.tan;
 
 /// 2/sqrt(π)
 pub const two_sqrtpi = std.math.two_sqrtpi;

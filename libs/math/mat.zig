@@ -480,6 +480,37 @@ pub fn Mat4x4(
             return p;
         }
 
+        // Note, this is a "wrong" implementation of projection matrix that has been removed from math
+
+        /// Constructs a perspective projection matrix; a perspective transformation matrix
+        /// which transforms from eye space to clip space.
+        ///
+        /// The field of view angle `fovy` is the vertical angle in radians.
+        /// The `aspect` ratio is the ratio of the width to the height of the viewport.
+        /// The `near` and `far` parameters denote the depth (z coordinate) of the near and far clipping planes.
+        ///
+        /// Returns a perspective projection matrix.
+        pub inline fn perspective(
+            /// The field of view angle in the y direction, in radians.
+            fovy: f32,
+            /// The aspect ratio of the viewport's width to its height.
+            aspect: f32,
+            /// The depth (z coordinate) of the near clipping plane.
+            near: f32,
+            /// The depth (z coordinate) of the far clipping plane.
+            far: f32,
+        ) Matrix {
+            const f = 1.0 / math.tan(fovy / 2.0);
+            const zz = (near + far) / (near - far);
+            const zw = (2.0 * near * far) / (near - far);
+            return init(
+                &RowVec.init(f / aspect, 0, 0, 0),
+                &RowVec.init(0, f, 0, 0),
+                &RowVec.init(0, 0, zz, -1),
+                &RowVec.init(0, 0, zw, 0),
+            );
+        }
+
         pub const mul = Shared.mul;
         pub const mulVec = Shared.mulVec;
     };
