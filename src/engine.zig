@@ -240,7 +240,7 @@ pub const Scene = struct {
     objects: std.BoundedArray(Object, 1024),
 
     pub fn addObject(self: *Scene, mesh: *Mesh, material: *Material) !*Object {
-        var object = try self.objects.addOne();
+        const object = try self.objects.addOne();
         object.* = .{ .mesh = mesh, .material = material };
         return object;
     }
@@ -288,7 +288,7 @@ pub const Mesh = struct {
     }
 
     fn addElement(attributeId: u32, normalize: bool, elementCount: u32, elementPosition: u32) void {
-        var norm: u8 = if (normalize) gl.TRUE else gl.FALSE;
+        const norm: u8 = if (normalize) gl.TRUE else gl.FALSE;
 
         const ec: ?*const anyopaque = @ptrFromInt(elementPosition);
         gl.vertexAttribPointer(attributeId, @intCast(elementCount), gl.FLOAT, norm, @sizeOf(Vertex), ec);
@@ -362,12 +362,12 @@ pub const Shader = struct {
     };
 
     pub fn compile(self: *Self) !void {
-        var vertShader = gl.createShader(gl.VERTEX_SHADER);
+        const vertShader = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vertShader, 1, &self.vertSource.ptr, null);
         gl.compileShader(vertShader);
         try logShaderError(vertShader);
 
-        var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+        const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
         gl.shaderSource(fragShader, 1, &self.fragSource.ptr, null);
         gl.compileShader(fragShader);
         try logShaderError(fragShader);
@@ -547,7 +547,7 @@ pub const Texture = struct {
         var channels: c_int = undefined;
 
         c.stbi_set_flip_vertically_on_load(1);
-        var buffer = c.stbi_load(path, &w, &h, &channels, 0);
+        const buffer = c.stbi_load(path, &w, &h, &channels, 0);
 
         if (buffer == null) {
             return Error.FailedLoading;
@@ -608,7 +608,7 @@ pub fn glLogError() !void {
     var err: gl.GLenum = gl.getError();
     const hasErrored = err != gl.NO_ERROR;
     while (err != gl.NO_ERROR) {
-        var errorString = switch (err) {
+        const errorString = switch (err) {
             gl.INVALID_ENUM => "INVALID_ENUM",
             gl.INVALID_VALUE => "INVALID_VALUE",
             gl.INVALID_OPERATION => "INVALID_OPERATION",
