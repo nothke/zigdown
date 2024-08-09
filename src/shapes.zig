@@ -5,7 +5,7 @@ const Engine = _engine.Engine;
 const Mesh = _engine.Mesh;
 const Shader = _engine.Shader;
 const Vertex = _engine.Vertex;
-const math = @import("mach").math;
+const math = _engine.math;
 
 fn tof32(value: anytype) f32 {
     return @as(f32, @floatFromInt(value));

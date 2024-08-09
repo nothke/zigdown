@@ -1,7 +1,7 @@
 const std = @import("std");
 const gl = @import("gl");
 const glfw = @import("mach-glfw");
-pub const math = @import("../libs/math/main.zig");
+pub const math = @import("math");
 const c = @import("c.zig");
 const Color = @import("color.zig").Color;
 
@@ -209,7 +209,7 @@ pub const Camera = struct {
         self.aspectRatio = @as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(size.height));
 
         self.projectionMatrix = Mat4x4.perspective(
-            math.degreesToRadians(f32, self.fov),
+            math.degreesToRadians(self.fov),
             self.aspectRatio,
             self.nearPlane,
             self.farPlane,

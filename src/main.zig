@@ -186,7 +186,8 @@ pub fn main() !void {
 
                         for (0..indexCount) |ic| {
                             const start = ic * 2;
-                            const vi = std.mem.readIntNative(u16, indexData[start..][0..2]);
+                            //const vi = std.mem.readIntNative(u16, indexData[start..][0..2]);
+                            const vi = std.mem.readInt(u16, indexData[start..][0..2], .little);
                             //std.log.info("first: {}", .{vi});
                             try gameMesh.indices.append(vi);
                         }

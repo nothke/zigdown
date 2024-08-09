@@ -1,5 +1,5 @@
 const std = @import("std");
-const math = @import("mach").math;
+const math = @import("math");
 
 const ColorMethods = @This();
 

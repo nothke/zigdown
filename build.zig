@@ -35,6 +35,11 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("libs/gl41.zig"),
     }));
 
+    // mach math
+    exe.root_module.addImport("math", b.createModule(.{
+        .root_source_file = b.path("libs/math/main.zig"),
+    }));
+
     // Include C
 
     exe.linkLibC();
