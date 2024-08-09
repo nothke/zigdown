@@ -2,9 +2,9 @@
 
 A little OpenGL engine written in zig, inspired by my C++ engine used for [Shakedown Rally](https://nothke.itch.io/shakedown).
 
-WIP: This engine is heavily under development and not really usable at this moment.
+WIP: This engine is heavily under on-and-off development and not really usable at this moment.
 
-Note that I left this project while I was in the middle of implementing glTF texture loading, hence why main.zig is full of unsuccessful glTF experiments.
+Note that I left this project while I was in the middle of implementing glTF texture loading, hence why main.zig is full of unsuccessful glTF experiments. You're on your own fiddling with it.
 
 Features progress:
 - [x] Window handling
@@ -55,4 +55,6 @@ pub fn main() !void {
 Made entirely on stream which you can catch on [twitch.tv/nothke](https://www.twitch.tv/nothke).
 
 ### How to build:
+Confirmed to build with Zig 0.13.0.
+
 Simply run `zig build run`!
