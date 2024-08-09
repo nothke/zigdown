@@ -156,7 +156,7 @@ pub const Engine = struct {
                 .mods = mods,
             }) catch {};
 
-            std.log.info("key: {}, pressed: {}, action: {}, allocd keys: {}", .{ key, scancode, action, instance.input.keyEvents.len });
+            //std.log.info("key: {}, pressed: {}, action: {}, allocd keys: {}", .{ key, scancode, action, instance.input.keyEvents.len });
         }
 
         pub fn clearEvents(self: *Input) void {
