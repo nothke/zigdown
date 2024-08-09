@@ -16,7 +16,7 @@ const Material = _engine.Material;
 
 const Color = @import("color.zig");
 
-const math = @import("../libs/math/main.zig");
+const math = _engine.math;
 
 const Shapes = @import("shapes.zig");
 
@@ -93,9 +93,6 @@ pub fn main() !void {
     var sphereGO = try engine.scene.?.addObject(&sphereMesh, &testMaterial);
     var sphereGO2 = try engine.scene.?.addObject(&sphereMesh, &brickMaterial);
 
-    var pcg = std.rand.Pcg.init(345);
-    _ = pcg;
-
     // for (0..200) |i| {
     //     _ = i;
     //     if (pcg.random().boolean()) {
@@ -153,19 +150,19 @@ pub fn main() !void {
                     const data_addr = @as([*]const u8, @ptrCast(buffer.data)) + accessor.offset + bufferView.offset;
 
                     if (attribute.type == .position) {
-                        var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
+                        const vertData = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
                         for (0..vertexCount) |vi| {
                             //std.log.info("vec: {d:.2}", .{vertData[vi]});
                             gameMesh.vertices.items[vi].position = .{ .v = flipZ(vertData[vi]) };
                         }
                     } else if (attribute.type == .normal) {
-                        var vertData = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
+                        const vertData = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
                         for (0..vertexCount) |vi| {
                             //std.log.info("vec: {d:.2}", .{vertData[vi]});
                             gameMesh.vertices.items[vi].normal = .{ .v = flipZ(vertData[vi]) };
                         }
                     } else if (attribute.type == .texcoord) {
-                        var vertData = @as([*]const [2]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
+                        const vertData = @as([*]const [2]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
                         for (0..vertexCount) |vi| {
                             //std.log.info("vec: {d:.2}", .{vertData[vi]});
                             gameMesh.vertices.items[vi].uv = .{ .v = vertData[vi] };
@@ -175,8 +172,8 @@ pub fn main() !void {
 
                 {
                     const indexAccessor = primitive.indices.?;
-                    var indexBufferView = indexAccessor.buffer_view.?;
-                    var buffer = indexBufferView.buffer;
+                    const indexBufferView = indexAccessor.buffer_view.?;
+                    const buffer = indexBufferView.buffer;
                     const indexCount = indexAccessor.count;
                     try gameMesh.indices.ensureTotalCapacity(indexCount);
 
@@ -189,7 +186,7 @@ pub fn main() !void {
 
                         for (0..indexCount) |ic| {
                             const start = ic * 2;
-                            var vi = std.mem.readIntNative(u16, indexData[start..][0..2]);
+                            const vi = std.mem.readIntNative(u16, indexData[start..][0..2]);
                             //std.log.info("first: {}", .{vi});
                             try gameMesh.indices.append(vi);
                         }
@@ -202,7 +199,7 @@ pub fn main() !void {
         defer zgltf_obj.deinit();
         const gltf_source = @embedFile("../res/testcube.gltf");
         try zgltf_obj.parse(gltf_source);
-        var data = zgltf_obj.data;
+        const data = zgltf_obj.data;
         zgltf_obj.debugPrint();
         var vertices = std.ArrayList(f32).init(alloc);
         defer vertices.deinit();
@@ -245,7 +242,7 @@ pub fn main() !void {
     var lastFrameTime = glfw.getTime();
 
     while (engine.isRunning()) {
-        var dt: f32 = @floatCast(glfw.getTime() - lastFrameTime);
+        const dt: f32 = @floatCast(glfw.getTime() - lastFrameTime);
         lastFrameTime = glfw.getTime();
 
         const speed = dt;

@@ -16,8 +16,8 @@ fn circlePoints(points: []math.Vec3, sides: u32, radius: f32) !void {
         @panic("Points slice must be sides + 1");
 
     for (0..sides + 1) |i| {
-        var theta = tof32(i) * 2 * math.pi / tof32(sides);
-        var ci = math.vec3(@cos(theta) * radius, 0, @sin(theta) * radius);
+        const theta = tof32(i) * 2 * math.pi / tof32(sides);
+        const ci = math.vec3(@cos(theta) * radius, 0, @sin(theta) * radius);
         points[i] = ci;
     }
 }

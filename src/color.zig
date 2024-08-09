@@ -144,7 +144,7 @@ test "white" {
 }
 
 test "blank" {
-    var color = Color{};
+    const color = Color{};
     try isEq(color, fromVec(f32x4{ 0, 0, 0, 1 }));
 }
 
@@ -155,6 +155,7 @@ test "saturate" {
 
 test "complex comptime" {
     comptime var color = white.multRGB(23).saturate();
+    color.a = color.a;
 
     try isEq(color.b, 1);
     comptime try isEq(color.b, 1);

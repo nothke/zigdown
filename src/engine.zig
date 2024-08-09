@@ -1,7 +1,7 @@
 const std = @import("std");
 const gl = @import("gl");
 const glfw = @import("mach-glfw");
-const math = @import("mach").math;
+pub const math = @import("../libs/math/main.zig");
 const c = @import("c.zig");
 const Color = @import("color.zig").Color;
 
