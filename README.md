@@ -2,7 +2,33 @@
 
 A little OpenGL engine written in zig, inspired by my C++ engine used for [Shakedown Rally](https://nothke.itch.io/shakedown).
 
-WIP: This engine has just started development and not really usable at this moment.
+WIP: This engine is heavily under development and not really usable at this moment.
+
+Note that I left this project while I was in the middle of implementing glTF texture loading, hence why main.zig is full of unsuccessful glTF experiments.
+
+Features progress:
+- [x] Window handling
+- [x] Input
+- [x] Perspective projection camera
+- [x] Meshes
+- [x] Shaders
+    - [x] Compiling
+    - [x] Setting uniforms
+- [x] Materials
+    - [x] Properties
+- [x] Transforms
+- [x] Textures
+- [x] Scene
+- [x] (Game)Objects
+- [ ] glTF loading - partial
+- [ ] Primitives (submeshes)
+- [ ] Removing Objects persistence
+- [ ] Dear ImGui integration
+- [ ] Physics
+- [ ] Audio
+- [ ] Arbitrary vertex layout meshes
+- [ ] Skinned meshes
+- [ ] Animations
 
 ### Goals
 The goal of this engine is to provide a very easy to use wrapper for window, 3D rendering, model loading, scene and object creation, UI and physics, with good defaults.
