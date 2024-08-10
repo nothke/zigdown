@@ -4,8 +4,8 @@
     .minimum_zig_version = "0.13.0",
     .dependencies = .{
         .mach_glfw = .{
-            .url = "https://pkg.machengine.org/mach-glfw/fb4ae48540454270ab969c8c645bbc6eff3c2dfb.tar.gz",
-            .hash = "12201ae68707aefe54ffb9d8c64721d4a2ac36186f8bd390e4f670033fec6737664a",
+            .url = "https://github.com/silversquirl/mach-glfw/archive/ccf677602328d3ec3f9103f705ae2c3e6ebde271.tar.gz",
+            .hash = "1220cdcde5cb8c8e323ebfbdcbde734ac5638bacaa5e6affabd4fbfd74fecf6eace4",
         },
         .zgltf = .{
             .url = "https://github.com/kooparse/zgltf/archive/17fb60b270fa25b3e07b7b3cdb253f86747f9616.tar.gz",
