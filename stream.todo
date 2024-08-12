@@ -102,7 +102,17 @@ Stream 9:
     ✔ gltf: Load normals and uvs @done(23-09-29 04:20)
 
 Stream 10:
-    ☐ Load a texture
-    ☐ Abstract gltf loading with AssetManager
-    ☐ Load multiple objects
-    ☐ Load Textures from gltf
+    In the year before the stream:
+        ✔ Updated the engine to use 0.13 @done(24-08-13 00:58)
+        ✔ Got zgltf to work @done(24-08-13 00:58)
+    On stream:
+        ✔ Removed unnecessary memory copy @done(24-08-13 00:58)
+        ☐ Move loading from memory to Texture
+        ☐ Put all textures in ArrayList
+        ☐ Remove cgltf completely
+
+    From last year:
+        ☐ Load a texture
+        ☐ Abstract gltf loading with AssetManager
+        ☐ Load multiple objects
+        ☐ Load Textures from gltf

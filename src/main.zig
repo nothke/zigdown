@@ -218,20 +218,8 @@ pub fn main() !void {
         for (gltf.data.images.items) |image| {
             const img = image.data.?;
 
-            std.log.info("img: len: {}", .{img.len});
-
-            var x: i32 = undefined;
-            var y: i32 = undefined;
-            var channels: i32 = undefined;
-            const buffer = c.stbi_load_from_memory(img.ptr, @intCast(img.len), &x, &y, &channels, 0);
-
-            var tex = Texture{
-                .buffer = buffer,
-                .channels = channels,
-                .width = x,
-                .height = y,
-            };
-
+            var tex: Texture = .{};
+            try tex.loadFromBuffer(img);
             tex.log();
 
             try tex.create();

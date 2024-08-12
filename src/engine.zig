@@ -574,6 +574,23 @@ pub const Texture = struct {
         self.buffer = buffer;
     }
 
+    pub fn loadFromBuffer(self: *Texture, img: []const u8) !void {
+        var w: i32 = undefined;
+        var h: i32 = undefined;
+        var channels: i32 = undefined;
+
+        const buffer = c.stbi_load_from_memory(img.ptr, @intCast(img.len), &w, &h, &channels, 0);
+
+        if (buffer == null) {
+            return Error.FailedLoading;
+        }
+
+        self.width = w;
+        self.height = h;
+        self.channels = channels;
+        self.buffer = buffer;
+    }
+
     pub fn create(self: *Texture) !void {
         gl.genTextures(1, &self.id);
         gl.bindTexture(gl.TEXTURE_2D, self.id);
