@@ -63,14 +63,12 @@ pub fn main() !void {
     try shader.compile();
     defer shader.deinit();
 
-    var brickTex = Texture{};
-    try brickTex.load("res/uv_checker.png");
+    var brickTex = try Texture.load("res/uv_checker.png");
     defer brickTex.deinit();
     brickTex.log();
     try brickTex.create();
 
-    var testTex = Texture{};
-    try testTex.load("res/painting.png");
+    var testTex = try Texture.load("res/painting.png");
     defer testTex.deinit();
     testTex.log();
     try testTex.create();
@@ -215,15 +213,20 @@ pub fn main() !void {
         //const data = zgltf_obj.data;
         gltf.debugPrint();
 
+        var texturesList = std.ArrayList(Texture).init(alloc);
+        defer texturesList.deinit();
+
         for (gltf.data.images.items) |image| {
             const img = image.data.?;
 
-            var tex: Texture = .{};
-            try tex.loadFromBuffer(img);
+            var tex = try Texture.loadFromBuffer(img);
+            defer tex.deinit();
+
             tex.log();
 
             try tex.create();
-            defer tex.deinit();
+
+            try texturesList.append(tex);
         }
 
         // for (zgltf_obj.data.textures.items) |gltfTextures| {

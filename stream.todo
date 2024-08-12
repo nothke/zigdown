@@ -107,7 +107,8 @@ Stream 10:
         ✔ Got zgltf to work @done(24-08-13 00:58)
     On stream:
         ✔ Removed unnecessary memory copy @done(24-08-13 00:58)
-        ☐ Move loading from memory to Texture
+        ✔ Move loading from memory to Texture @done(24-08-13 01:14)
+        ☐ Make Texture load return Texture
         ☐ Put all textures in ArrayList
         ☐ Remove cgltf completely
 

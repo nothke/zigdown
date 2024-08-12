@@ -548,7 +548,7 @@ pub const Texture = struct {
     width: i32 = 0,
     height: i32 = 0,
     channels: i32 = 0,
-    buffer: [*c]u8 = null,
+    buffer: ?[*]u8 = null,
     id: u32 = 0,
 
     const Error = error{
@@ -556,7 +556,7 @@ pub const Texture = struct {
         FailedLoading,
     };
 
-    pub fn load(self: *Texture, path: [:0]const u8) !void {
+    pub fn load(path: [:0]const u8) !Texture {
         var w: c_int = undefined;
         var h: c_int = undefined;
         var channels: c_int = undefined;
@@ -568,13 +568,15 @@ pub const Texture = struct {
             return Error.FailedLoading;
         }
 
-        self.width = w;
-        self.height = h;
-        self.channels = channels;
-        self.buffer = buffer;
+        return Texture{
+            .width = w,
+            .height = h,
+            .channels = channels,
+            .buffer = buffer,
+        };
     }
 
-    pub fn loadFromBuffer(self: *Texture, img: []const u8) !void {
+    pub fn loadFromBuffer(img: []const u8) !Texture {
         var w: i32 = undefined;
         var h: i32 = undefined;
         var channels: i32 = undefined;
@@ -585,10 +587,12 @@ pub const Texture = struct {
             return Error.FailedLoading;
         }
 
-        self.width = w;
-        self.height = h;
-        self.channels = channels;
-        self.buffer = buffer;
+        return Texture{
+            .width = w,
+            .height = h,
+            .channels = channels,
+            .buffer = buffer,
+        };
     }
 
     pub fn create(self: *Texture) !void {
