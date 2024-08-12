@@ -615,7 +615,7 @@ pub const Texture = struct {
     }
 
     pub fn log(self: Texture) void {
-        std.log.info("width: {}, height: {}, channels: {}, isValid {}", .{ self.width, self.height, self.channels, self.buffer != null });
+        std.log.info("Texture: width: {}, height: {}, channels: {}, isValid: {}", .{ self.width, self.height, self.channels, self.buffer != null });
     }
 };
 

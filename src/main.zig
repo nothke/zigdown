@@ -2,7 +2,7 @@ const std = @import("std");
 const glfw = @import("mach-glfw");
 const gl = @import("gl");
 const c = @import("c.zig");
-const gltf = @import("zcgltf.zig");
+const cgltf = @import("zcgltf.zig");
 const zgltf = @import("zgltf");
 
 const _engine = @import("engine.zig");
@@ -93,28 +93,29 @@ pub fn main() !void {
     var sphereGO = try scene.addObject(&sphereMesh, &testMaterial);
     var sphereGO2 = try scene.addObject(&sphereMesh, &brickMaterial);
 
-    {
-        var pcg = std.Random.Pcg.init(54);
+    // {
+    //     var pcg = std.Random.Pcg.init(54);
 
-        for (0..200) |_| {
-            if (pcg.random().boolean()) {
-                _ = try scene.addObject(&quadMesh, &testMaterial);
-            } else {
-                _ = try scene.addObject(&quadMesh, &brickMaterial);
-            }
-        }
-    }
+    //     for (0..200) |_| {
+    //         if (pcg.random().boolean()) {
+    //             _ = try scene.addObject(&quadMesh, &testMaterial);
+    //         } else {
+    //             _ = try scene.addObject(&quadMesh, &brickMaterial);
+    //         }
+    //     }
+    // }
 
     // GLTF
 
-    const use_zgltf = comptime false;
+    const use_zgltf = true;
 
     var gameMesh = Mesh.init(alloc);
     defer gameMesh.deinit();
 
-    if (!use_zgltf) {
-        var data = try gltf.parseFile(.{}, "res/testcube.gltf");
-        try gltf.loadBuffers(.{}, data, "res/testcube.gltf");
+    if (!use_zgltf) { // Uses cgltf
+
+        var data = try cgltf.parseFile(.{}, "res/testcube.gltf");
+        try cgltf.loadBuffers(.{}, data, "res/testcube.gltf");
 
         // Materials
 
@@ -198,45 +199,81 @@ pub fn main() !void {
                 }
             }
         }
-    } else {
-        var zgltf_obj = zgltf.init(alloc);
-        defer zgltf_obj.deinit();
-        const gltf_source = @embedFile("../res/testcube.gltf");
-        try zgltf_obj.parse(gltf_source);
-        const data = zgltf_obj.data;
-        zgltf_obj.debugPrint();
-        var vertices = std.ArrayList(f32).init(alloc);
-        defer vertices.deinit();
-        for (data.meshes.items) |mesh| {
-            for (mesh.primitives.items) |primitive| {
-                for (primitive.attributes.items) |attribute| {
-                    if (attribute == .position) {
-                        const accessor = zgltf_obj.data.accessors.items[attribute.position];
+    } else { // Uses zgltf
+        var file = try std.fs.cwd().openFile("res/testcubes.glb", .{});
+        defer file.close();
 
-                        std.log.info("Found position! comp_type={s} type={s}", .{ @tagName(accessor.component_type), @tagName(accessor.type) });
-                        std.log.info("TODO - get data", .{});
+        // TODO: Check the size of file and set as max bytes
+        const file_buffer = try file.readToEndAllocOptions(std.heap.page_allocator, 1024 * 1024, null, 4, null);
+        defer std.heap.page_allocator.free(file_buffer);
 
-                        const bvi = accessor.buffer_view.?;
+        var gltf = zgltf.init(alloc);
+        defer gltf.deinit();
 
-                        const bi = data.buffer_views.items[bvi].buffer;
-                        const buffer = data.buffers.items[bi];
+        try gltf.parse(file_buffer);
 
-                        const uri = buffer.uri.?;
+        //const data = zgltf_obj.data;
+        gltf.debugPrint();
 
-                        std.log.info("first item: {}, length: {}", .{ uri.len, buffer.byte_length });
+        for (gltf.data.images.items) |image| {
+            const img = image.data.?;
 
-                        // TODO - get data. the following is from the example on
-                        // the zgltf readme. not sure how it should work. i tried
-                        // passing 'gltf_source' for the 'bin' param below, but
-                        // that isn't correct.  'bin' seems to expect some kind of
-                        // binary file.
-                        //
-                        // zgltf_obj.getDataFromBufferView(f32, &vertices, accessor, bin);
+            std.log.info("img: len: {}", .{img.len});
 
-                    }
-                }
-            }
+            var x: i32 = undefined;
+            var y: i32 = undefined;
+            var channels: i32 = undefined;
+            const buffer = c.stbi_load_from_memory(img.ptr, @intCast(img.len), &x, &y, &channels, 0);
+
+            var tex = Texture{
+                .buffer = buffer,
+                .channels = channels,
+                .width = x,
+                .height = y,
+            };
+
+            tex.log();
+
+            try tex.create();
+            defer tex.deinit();
         }
+
+        // for (zgltf_obj.data.textures.items) |gltfTextures| {
+        //     zgltf_obj.getDataFromBufferView(comptime T: type, list: *ArrayList(T), accessor: Accessor, binary: []const u8)
+        // }
+
+        // var vertices = std.ArrayList(f32).init(alloc);
+        // defer vertices.deinit();
+        // for (data.meshes.items) |mesh| {
+        //     for (mesh.primitives.items) |primitive| {
+        //         for (primitive.attributes.items) |attribute| {
+        //             if (attribute == .position) {
+        //                 const accessor = zgltf_obj.data.accessors.items[attribute.position];
+
+        //                 std.log.info("Found position! comp_type={s} type={s}", .{ @tagName(accessor.component_type), @tagName(accessor.type) });
+        //                 std.log.info("TODO - get data", .{});
+
+        //                 const bvi = accessor.buffer_view.?;
+
+        //                 const bi = data.buffer_views.items[bvi].buffer;
+        //                 const buffer = data.buffers.items[bi];
+
+        //                 const uri = buffer.uri.?;
+
+        //                 std.log.info("first item: {}, length: {}", .{ uri.len, buffer.byte_length });
+
+        //                 // TODO - get data. the following is from the example on
+        //                 // the zgltf readme. not sure how it should work. i tried
+        //                 // passing 'gltf_source' for the 'bin' param below, but
+        //                 // that isn't correct.  'bin' seems to expect some kind of
+        //                 // binary file.
+        //                 //
+        //                 // zgltf_obj.getDataFromBufferView(f32, &vertices, accessor, bin);
+
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     try gameMesh.create();
