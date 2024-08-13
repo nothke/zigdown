@@ -223,6 +223,10 @@ pub const Camera = struct {
 
 pub const Transform = struct {
     local2world: Mat4x4 = ident,
+
+    pub fn translate(self: *Transform, vec: Vec3) void {
+        self.local2world = self.local2world.mul(&Mat4x4.translate(vec));
+    }
 };
 
 pub const Object = struct {

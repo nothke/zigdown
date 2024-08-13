@@ -233,7 +233,7 @@ pub fn main() !void {
             const img = image.data.?;
 
             var tex = try Texture.loadFromBuffer(img);
-            defer tex.deinit();
+            //defer tex.deinit();
 
             tex.log();
 
@@ -325,15 +325,36 @@ pub fn main() !void {
                 intList.clearRetainingCapacity();
 
                 try meshPtr.create();
-
-                if (primitive.material) |matIndex| {
-                    _ = try scene.addObject(meshPtr, &matList.items[matIndex]);
-                    meshPtr.log();
-                } else {
-                    _ = try scene.addObject(meshPtr, &testMaterial);
-                    meshPtr.log();
-                }
             }
+        }
+
+        std.log.info("### OBJECTS ###", .{});
+
+        for (gltf.data.nodes.items) |node| {
+            if (node.matrix) |matrix| {
+                _ = matrix; // autofix
+                std.log.info("Found matrix!", .{});
+            }
+
+            std.log.info("name: {s}, mesh: {}", .{ node.name, node.mesh.? });
+            std.log.info("    - position: {d}", .{node.translation});
+            std.log.info("    - rotation: {d}", .{node.rotation});
+            std.log.info("    - scale: {d}", .{node.scale});
+
+            // const mesh: *Mesh = &meshList.items[(node.mesh orelse 0)];
+
+            var obj = try scene.addObject(&meshList.items[0], &matList.items[0]);
+            //obj.transform.local2world = math.Mat4x4.ident.mul(&math.Mat4x4.translate(node.translation));
+            const pos: math.Vec3 = .{ .v = node.translation };
+            obj.transform.translate((pos));
+
+            // if (primitive.material) |matIndex| {
+            //     var obj = try scene.addObject(meshPtr, &matList.items[matIndex]);
+            //     meshPtr.log();
+            // } else {
+            //     _ = try scene.addObject(meshPtr, &testMaterial);
+            //     meshPtr.log();
+            // }
         }
 
         // for (meshList.items) |*mesh| {
