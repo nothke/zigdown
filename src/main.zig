@@ -387,76 +387,40 @@ pub fn main() !void {
         for (gltf.data.nodes.items) |node| {
             std.log.info("", .{});
 
-            if (node.matrix) |matrix| {
-                _ = matrix; // autofix
-                std.log.info("Found matrix!", .{});
-            }
-
-            std.log.info("\"{s}\", mesh: {}", .{ node.name, node.mesh.? });
-            std.log.info("    - position: {d}", .{node.translation});
-            std.log.info("    - rotation: {d}", .{node.rotation});
-            std.log.info("    - scale: {d}", .{node.scale});
-
-            // const mesh: *Mesh = &meshList.items[(node.mesh orelse 0)];
-
             var obj = try scene.addObject(&meshList.items[0], &matList.items[0]);
-            //obj.transform.local2world = math.Mat4x4.ident.mul(&math.Mat4x4.translate(node.translation));
-            const pos: math.Vec3 = .{ .v = node.translation };
-            obj.transform.translate(pos);
 
-            // TODO: Rotation
-            //const rot = math.Quat = .{ .v = node.rotation };
-            //obj.transform.local2world = obj.transform.local2world.
+            if (node.matrix) |matrix| {
+                std.log.info("    - Found matrix!", .{});
 
-            // if (primitive.material) |matIndex| {
-            //     var obj = try scene.addObject(meshPtr, &matList.items[matIndex]);
-            //     meshPtr.log();
-            // } else {
-            //     _ = try scene.addObject(meshPtr, &testMaterial);
-            //     meshPtr.log();
-            // }
+                obj.transform.local2world = .{
+                    .v = [_]math.Vec4{
+                        .{ .v = matrix[0..4].* },
+                        .{ .v = matrix[4..8].* },
+                        .{ .v = matrix[8..12].* },
+                        .{ .v = matrix[12..16].* },
+                    },
+                };
+            } else {
+                std.log.info("\"{s}\", mesh: {}", .{ node.name, node.mesh.? });
+                std.log.info("    - position: {d}", .{node.translation});
+                std.log.info("    - rotation: {d}", .{node.rotation});
+                std.log.info("    - scale: {d}", .{node.scale});
+
+                // const mesh: *Mesh = &meshList.items[(node.mesh orelse 0)];
+
+                //obj.transform.local2world = math.Mat4x4.ident.mul(&math.Mat4x4.translate(node.translation));
+                const pos: math.Vec3 = .{ .v = node.translation };
+                //const rot: math.Quat = .{ .v = node.rotation };
+                const scl: math.Vec3 = .{ .v = node.scale };
+
+                obj.transform.translate(pos);
+                obj.transform.local2world = obj.transform.local2world.mul(&math.Mat4x4.scale(scl));
+
+                // TODO: Rotation
+                //const rot = math.Quat = .{ .v = node.rotation };
+                //obj.transform.local2world = obj.transform.local2world.
+            }
         }
-
-        // for (meshList.items) |*mesh| {
-        //     _ = try scene.addObject(mesh, &testMaterial);
-        // }
-
-        // for (zgltf_obj.data.textures.items) |gltfTextures| {
-        //     zgltf_obj.getDataFromBufferView(comptime T: type, list: *ArrayList(T), accessor: Accessor, binary: []const u8)
-        // }
-
-        // var vertices = std.ArrayList(f32).init(alloc);
-        // defer vertices.deinit();
-        // for (data.meshes.items) |mesh| {
-        //     for (mesh.primitives.items) |primitive| {
-        //         for (primitive.attributes.items) |attribute| {
-        //             if (attribute == .position) {
-        //                 const accessor = zgltf_obj.data.accessors.items[attribute.position];
-
-        //                 std.log.info("Found position! comp_type={s} type={s}", .{ @tagName(accessor.component_type), @tagName(accessor.type) });
-        //                 std.log.info("TODO - get data", .{});
-
-        //                 const bvi = accessor.buffer_view.?;
-
-        //                 const bi = data.buffer_views.items[bvi].buffer;
-        //                 const buffer = data.buffers.items[bi];
-
-        //                 const uri = buffer.uri.?;
-
-        //                 std.log.info("first item: {}, length: {}", .{ uri.len, buffer.byte_length });
-
-        //                 // TODO - get data. the following is from the example on
-        //                 // the zgltf readme. not sure how it should work. i tried
-        //                 // passing 'gltf_source' for the 'bin' param below, but
-        //                 // that isn't correct.  'bin' seems to expect some kind of
-        //                 // binary file.
-        //                 //
-        //                 // zgltf_obj.getDataFromBufferView(f32, &vertices, accessor, bin);
-
-        //             }
-        //         }
-        //     }
-        // }
     }
 
     try gameMesh.create();
