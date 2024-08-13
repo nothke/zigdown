@@ -90,6 +90,14 @@ pub fn toVec(self: Color) f32x4 {
     return @bitCast(self);
 }
 
+pub fn fromSlice(arr: []const f32) Color {
+    if (arr.len == 4) {
+        return Color{ .r = arr[0], .g = arr[1], .b = arr[2], .a = arr[3] };
+    } else if (arr.len == 3) {
+        return Color{ .r = arr[0], .g = arr[1], .b = arr[2], .a = 1 };
+    } else unreachable;
+}
+
 pub fn fromU8x4(v: u8x4) Color {
     return fromVec(@as(f32x4, @floatFromInt(v)) / vecFromScalar(255));
 }
