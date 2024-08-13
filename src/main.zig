@@ -250,10 +250,12 @@ pub fn main() !void {
         var intList = std.ArrayList(u16).init(alloc);
         defer intList.deinit();
 
-        std.log.info("\n# Materials\n", .{});
+        std.log.info("", .{});
+        std.log.info("# Materials", .{});
 
         for (gltf.data.materials.items) |gltfMaterial| {
-            std.log.info("- {s}", .{gltfMaterial.name});
+            std.log.info("", .{});
+            std.log.info("Material: \"{s}\"", .{gltfMaterial.name});
 
             var mat = Material{ .shader = &shader };
 
@@ -275,18 +277,16 @@ pub fn main() !void {
         std.log.info("# Meshes", .{});
 
         for (gltf.data.meshes.items) |gltfMesh| {
-            const meshPtr = try meshList.addOne();
-            meshPtr.* = Mesh.init(alloc);
-
             std.log.info("", .{});
             std.log.info("Mesh: \"{s}\", primitives count: {}", .{ gltfMesh.name, gltfMesh.primitives.items.len });
 
             for (gltfMesh.primitives.items, 0..) |primitive, pi| {
+                const meshPtr = try meshList.addOne();
+                meshPtr.* = Mesh.init(alloc);
+
                 std.log.info("  -- primitive {}:", .{pi});
 
                 for (primitive.attributes.items) |attribute| {
-                    floatList.clearRetainingCapacity();
-
                     switch (attribute) {
                         .position => |accessor_index| {
                             const accessor = gltf.data.accessors.items[accessor_index];
@@ -312,28 +312,24 @@ pub fn main() !void {
                         .normal => |accessor_index| {
                             const accessor = gltf.data.accessors.items[accessor_index];
 
-                            floatList.clearRetainingCapacity();
-                            gltf.getDataFromBufferView(f32, &floatList, accessor, gltf.glb_binary.?);
-
                             std.debug.assert(accessor.component_type == .float);
                             std.debug.assert(accessor.type == .vec3);
 
-                            const correctCount = floatList.items.len == meshPtr.vertices.items.len * 3;
+                            gltf.getDataFromBufferView(f32, &floatList, accessor, gltf.glb_binary.?);
 
-                            std.log.info("      -- {} == {} ?", .{ meshPtr.vertices.items.len, accessor.count });
+                            std.debug.assert(meshPtr.vertices.items.len > 0);
 
-                            if (correctCount) {
-                                std.debug.assert(meshPtr.vertices.items.len > 0);
-                                std.log.info("      -- decoding normals: type: {}, floats: {}, vertices: {}", .{ accessor.component_type, floatList.items.len, meshPtr.vertices.items.len });
-                                std.debug.assert(floatList.items.len == meshPtr.vertices.items.len * 3);
+                            std.debug.assert(floatList.items.len == meshPtr.vertices.items.len * 3);
 
-                                for (meshPtr.vertices.items, 0..) |*vertex, i| {
-                                    vertex.normal = math.vec3(
-                                        floatList.items[i * 3 + 0],
-                                        floatList.items[i * 3 + 1],
-                                        floatList.items[i * 3 + 2],
-                                    );
-                                }
+                            std.log.info("      -- decoding normals: type: {}, floats: {}, vertices: {}", .{ accessor.component_type, floatList.items.len, meshPtr.vertices.items.len });
+                            std.debug.assert(floatList.items.len == meshPtr.vertices.items.len * 3);
+
+                            for (meshPtr.vertices.items, 0..) |*vertex, i| {
+                                vertex.normal = math.vec3(
+                                    floatList.items[i * 3 + 0],
+                                    floatList.items[i * 3 + 1],
+                                    floatList.items[i * 3 + 2],
+                                );
                             }
                         },
                         .texcoord => |accessor_index| {
@@ -346,15 +342,15 @@ pub fn main() !void {
 
                             std.log.info("      -- uvs: {} == {} ?", .{ meshPtr.vertices.items.len, accessor.count });
 
-                            //std.debug.assert(meshPtr.vertices.items.len > 0);
-                            //std.debug.assert(floatList.items.len == meshPtr.vertices.items.len * 2);
+                            std.debug.assert(meshPtr.vertices.items.len > 0);
+                            std.debug.assert(floatList.items.len == meshPtr.vertices.items.len * 2);
 
-                            // for (meshPtr.vertices.items, 0..) |*vertex, i| {
-                            //     vertex.uv = math.vec2(
-                            //         floatList.items[i * 2 + 0],
-                            //         floatList.items[i * 2 + 1],
-                            //     );
-                            // }
+                            for (meshPtr.vertices.items, 0..) |*vertex, i| {
+                                vertex.uv = math.vec2(
+                                    floatList.items[i * 2 + 0],
+                                    floatList.items[i * 2 + 1],
+                                );
+                            }
                         },
                         else => {},
                     }
@@ -368,14 +364,13 @@ pub fn main() !void {
 
                     gltf.getDataFromBufferView(u16, &intList, accessor, gltf.glb_binary.?);
 
-                    std.log.info("    - INDICES: count: {}, triangles: {}, type: short", .{ intList.items.len, @divExact(intList.items.len, 3) });
+                    std.log.info("    -- INDICES: count: {}, triangles: {}, type: short", .{ intList.items.len, @divExact(intList.items.len, 3) });
 
                     for (intList.items) |vi| {
                         try meshPtr.indices.append(@intCast(vi));
                     }
                 } else if (accessor.component_type == .unsigned_integer) {
-                    std.log.info("This is big int", .{});
-                    unreachable;
+                    @panic("i32 indices are not supported");
                 }
 
                 // TODO: add -freference to compile
@@ -387,16 +382,17 @@ pub fn main() !void {
         }
 
         std.log.info("", .{});
-        std.log.info("### Nodes ###", .{});
-        std.log.info("", .{});
+        std.log.info("# Nodes", .{});
 
         for (gltf.data.nodes.items) |node| {
+            std.log.info("", .{});
+
             if (node.matrix) |matrix| {
                 _ = matrix; // autofix
                 std.log.info("Found matrix!", .{});
             }
 
-            std.log.info("name: {s}, mesh: {}", .{ node.name, node.mesh.? });
+            std.log.info("\"{s}\", mesh: {}", .{ node.name, node.mesh.? });
             std.log.info("    - position: {d}", .{node.translation});
             std.log.info("    - rotation: {d}", .{node.rotation});
             std.log.info("    - scale: {d}", .{node.scale});
