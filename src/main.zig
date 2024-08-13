@@ -232,11 +232,43 @@ pub fn main() !void {
         var meshList = std.ArrayList(Mesh).init(alloc);
         defer meshList.deinit();
 
+        defer {
+            for (meshList.items) |mesh| {
+                mesh.deinit();
+            }
+        }
+
+        var matList = std.ArrayList(Material).init(alloc);
+        defer matList.deinit();
+
         var floatList = std.ArrayList(f32).init(alloc);
         defer floatList.deinit();
 
         var intList = std.ArrayList(u16).init(alloc);
         defer intList.deinit();
+
+        std.log.info("# Materials", .{});
+
+        for (gltf.data.materials.items) |gltfMaterial| {
+            std.log.info("- {s}", .{gltfMaterial.name});
+
+            var mat = Material{ .shader = &shader };
+
+            const col = gltfMaterial.metallic_roughness.base_color_factor;
+            std.log.info("   - color {d}", .{col});
+
+            const color = Color.fromSlice(&col);
+            try mat.addProp("_Color", color);
+
+            if (gltfMaterial.metallic_roughness.base_color_texture) |tex| {
+                std.log.info("   - has color texture: {}", .{tex.index});
+                try mat.addProp("_Texture", &texturesList.items[tex.index]); // test if has enough..?
+            }
+
+            try matList.append(mat);
+        }
+
+        std.log.info("# Meshes", .{});
 
         for (gltf.data.meshes.items) |gltfMesh| {
             const meshPtr = try meshList.addOne();
@@ -255,6 +287,8 @@ pub fn main() !void {
 
                             try meshPtr.vertices.ensureTotalCapacity(vertexCount);
 
+                            std.log.info("- vertex count: {}", .{vertexCount});
+
                             for (0..vertexCount) |vertexIndex| {
                                 try meshPtr.vertices.append(.{ .position = math.vec3(
                                     floatList.items[vertexIndex * 3 + 0],
@@ -268,33 +302,38 @@ pub fn main() !void {
                     }
 
                     floatList.clearRetainingCapacity();
-
-                    const accessor = gltf.data.accessors.items[primitive.indices.?];
-                    if (accessor.component_type == .unsigned_short) {
-                        intList.clearRetainingCapacity();
-
-                        std.log.info("It's unsigned short", .{});
-                        gltf.getDataFromBufferView(u16, &intList, accessor, gltf.glb_binary.?);
-
-                        //std.log.info("intList: {s}", .{intList.items});
-
-                        for (intList.items) |vi| {
-                            try meshPtr.indices.append(@intCast(vi));
-                        }
-                    } else if (accessor.component_type == .unsigned_integer) {
-                        std.log.info("This is big int", .{});
-                    }
-
-                    // TODO: add -freference to compile
-
-                    intList.clearRetainingCapacity();
                 }
+
+                const accessor = gltf.data.accessors.items[primitive.indices.?];
+                if (accessor.component_type == .unsigned_short) {
+                    intList.clearRetainingCapacity();
+
+                    gltf.getDataFromBufferView(u16, &intList, accessor, gltf.glb_binary.?);
+
+                    std.log.info("- Indices: count: {}, triangles: {}, type: short", .{ intList.items.len, @divExact(intList.items.len, 3) });
+
+                    for (intList.items) |vi| {
+                        try meshPtr.indices.append(@intCast(vi));
+                    }
+                } else if (accessor.component_type == .unsigned_integer) {
+                    std.log.info("This is big int", .{});
+                }
+
+                // TODO: add -freference to compile
+
+                intList.clearRetainingCapacity();
+
+                // if (primitive.material) |matIndex| {
+                //     _ = try scene.addObject(meshPtr, &matList.items[matIndex]);
+                // } else {
+                //     _ = try scene.addObject(meshPtr, &testMaterial);
+                // }
             }
         }
 
-        for (meshList.items) |*mesh| {
-            _ = try scene.addObject(mesh, &testMaterial);
-        }
+        // for (meshList.items) |*mesh| {
+        //     _ = try scene.addObject(mesh, &testMaterial);
+        // }
 
         // for (zgltf_obj.data.textures.items) |gltfTextures| {
         //     zgltf_obj.getDataFromBufferView(comptime T: type, list: *ArrayList(T), accessor: Accessor, binary: []const u8)

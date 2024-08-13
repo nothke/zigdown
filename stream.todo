@@ -108,8 +108,10 @@ Stream 10:
     On stream:
         ✔ Removed unnecessary memory copy @done(24-08-13 00:58)
         ✔ Move loading from memory to Texture @done(24-08-13 01:14)
-        ☐ Make Texture load return Texture
-        ☐ Put all textures in ArrayList
+        ✔ Make Texture load return Texture @done(24-08-13 02:49)
+        ✔ Put all textures in ArrayList @done(24-08-13 02:49)
+        ✔ Load zgltf mesh vertices @done(24-08-13 02:50)
+        ✘ Load zgltf mesh indices @cancelled(24-08-13 02:50)
         ☐ Remove cgltf completely
 
     From last year:
