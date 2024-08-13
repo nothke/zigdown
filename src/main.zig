@@ -229,6 +229,73 @@ pub fn main() !void {
             try texturesList.append(tex);
         }
 
+        var meshList = std.ArrayList(Mesh).init(alloc);
+        defer meshList.deinit();
+
+        var floatList = std.ArrayList(f32).init(alloc);
+        defer floatList.deinit();
+
+        var intList = std.ArrayList(u16).init(alloc);
+        defer intList.deinit();
+
+        for (gltf.data.meshes.items) |gltfMesh| {
+            const meshPtr = try meshList.addOne();
+            meshPtr.* = Mesh.init(alloc);
+
+            for (gltfMesh.primitives.items) |primitive| {
+                std.log.info("{s} mesh. Primitives: {}", .{ gltfMesh.name, gltfMesh.primitives.items.len });
+
+                for (primitive.attributes.items) |attribute| {
+                    switch (attribute) {
+                        .position => |accessor_index| {
+                            const accessor = gltf.data.accessors.items[accessor_index];
+                            gltf.getDataFromBufferView(f32, &floatList, accessor, gltf.glb_binary.?);
+
+                            const vertexCount = @divFloor(floatList.items.len, 3);
+
+                            try meshPtr.vertices.ensureTotalCapacity(vertexCount);
+
+                            for (0..vertexCount) |vertexIndex| {
+                                try meshPtr.vertices.append(.{ .position = math.vec3(
+                                    floatList.items[vertexIndex * 3 + 0],
+                                    floatList.items[vertexIndex * 3 + 1],
+                                    floatList.items[vertexIndex * 3 + 2],
+                                ) });
+                            }
+                        },
+                        // TODO: normals and uvs
+                        else => {},
+                    }
+
+                    floatList.clearRetainingCapacity();
+
+                    const accessor = gltf.data.accessors.items[primitive.indices.?];
+                    if (accessor.component_type == .unsigned_short) {
+                        intList.clearRetainingCapacity();
+
+                        std.log.info("It's unsigned short", .{});
+                        gltf.getDataFromBufferView(u16, &intList, accessor, gltf.glb_binary.?);
+
+                        //std.log.info("intList: {s}", .{intList.items});
+
+                        for (intList.items) |vi| {
+                            try meshPtr.indices.append(@intCast(vi));
+                        }
+                    } else if (accessor.component_type == .unsigned_integer) {
+                        std.log.info("This is big int", .{});
+                    }
+
+                    // TODO: add -freference to compile
+
+                    intList.clearRetainingCapacity();
+                }
+            }
+        }
+
+        for (meshList.items) |*mesh| {
+            _ = try scene.addObject(mesh, &testMaterial);
+        }
+
         // for (zgltf_obj.data.textures.items) |gltfTextures| {
         //     zgltf_obj.getDataFromBufferView(comptime T: type, list: *ArrayList(T), accessor: Accessor, binary: []const u8)
         // }
