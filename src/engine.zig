@@ -340,8 +340,6 @@ pub const Mesh = struct {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, 0);
         gl.bindVertexArray(0);
 
-        std.log.info("sizeof vertex: {}", .{@sizeOf(Vertex)});
-
         self.vao = vao;
         self.vbo = vbo;
         self.ibo = ibo;
