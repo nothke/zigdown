@@ -469,7 +469,7 @@ pub fn main() !void {
         const dt: f32 = @floatCast(glfw.getTime() - lastFrameTime);
         lastFrameTime = glfw.getTime();
 
-        const speed = dt;
+        const speed = dt * 10;
 
         if (engine.input.keyPressed(.w)) {
             camOffset.v[2] -= speed;
