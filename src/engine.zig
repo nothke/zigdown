@@ -359,6 +359,16 @@ pub const Mesh = struct {
         self.indices.deinit();
         self.vertices.deinit();
     }
+
+    pub fn log(self: Self) void {
+        std.log.info("Mesh: data: verts: {}, indices: {}, vao: {}, vbo: {}, ibo: {}", .{
+            self.vertices.items.len,
+            self.indices.items.len,
+            self.vao,
+            self.vbo,
+            self.ibo,
+        });
+    }
 };
 
 pub const Shader = struct {

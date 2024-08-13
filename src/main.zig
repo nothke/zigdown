@@ -107,6 +107,22 @@ pub fn main() !void {
 
     const use_zgltf = true;
 
+    var texturesList = std.ArrayList(Texture).init(alloc);
+    defer texturesList.deinit();
+
+    var meshList = std.ArrayList(Mesh).init(alloc);
+    defer meshList.deinit();
+
+    defer {
+        for (meshList.items) |mesh| {
+            mesh.deinit();
+        }
+    }
+
+    var matList = std.ArrayList(Material).init(alloc);
+    defer matList.deinit();
+
+    // Old
     var gameMesh = Mesh.init(alloc);
     defer gameMesh.deinit();
 
@@ -213,9 +229,6 @@ pub fn main() !void {
         //const data = zgltf_obj.data;
         gltf.debugPrint();
 
-        var texturesList = std.ArrayList(Texture).init(alloc);
-        defer texturesList.deinit();
-
         for (gltf.data.images.items) |image| {
             const img = image.data.?;
 
@@ -228,18 +241,6 @@ pub fn main() !void {
 
             try texturesList.append(tex);
         }
-
-        var meshList = std.ArrayList(Mesh).init(alloc);
-        defer meshList.deinit();
-
-        defer {
-            for (meshList.items) |mesh| {
-                mesh.deinit();
-            }
-        }
-
-        var matList = std.ArrayList(Material).init(alloc);
-        defer matList.deinit();
 
         var floatList = std.ArrayList(f32).init(alloc);
         defer floatList.deinit();
@@ -323,11 +324,15 @@ pub fn main() !void {
 
                 intList.clearRetainingCapacity();
 
-                // if (primitive.material) |matIndex| {
-                //     _ = try scene.addObject(meshPtr, &matList.items[matIndex]);
-                // } else {
-                //     _ = try scene.addObject(meshPtr, &testMaterial);
-                // }
+                try meshPtr.create();
+
+                if (primitive.material) |matIndex| {
+                    _ = try scene.addObject(meshPtr, &matList.items[matIndex]);
+                    meshPtr.log();
+                } else {
+                    _ = try scene.addObject(meshPtr, &testMaterial);
+                    meshPtr.log();
+                }
             }
         }
 
