@@ -346,7 +346,11 @@ pub fn main() !void {
             var obj = try scene.addObject(&meshList.items[0], &matList.items[0]);
             //obj.transform.local2world = math.Mat4x4.ident.mul(&math.Mat4x4.translate(node.translation));
             const pos: math.Vec3 = .{ .v = node.translation };
-            obj.transform.translate((pos));
+            obj.transform.translate(pos);
+
+            // TODO: Rotation
+            //const rot = math.Quat = .{ .v = node.rotation };
+            //obj.transform.local2world = obj.transform.local2world.
 
             // if (primitive.material) |matIndex| {
             //     var obj = try scene.addObject(meshPtr, &matList.items[matIndex]);
