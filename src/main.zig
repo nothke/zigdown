@@ -214,6 +214,8 @@ pub fn main() !void {
             }
         }
     } else { // Uses zgltf
+        std.log.info("###### zGLTF ######", .{});
+
         var file = try std.fs.cwd().openFile("res/testcubes.glb", .{});
         defer file.close();
 
@@ -298,7 +300,43 @@ pub fn main() !void {
                                 ) });
                             }
                         },
-                        // TODO: normals and uvs
+                        .normal => |accessor_index| {
+                            const accessor = gltf.data.accessors.items[accessor_index];
+
+                            floatList.clearRetainingCapacity();
+                            gltf.getDataFromBufferView(f32, &floatList, accessor, gltf.glb_binary.?);
+
+                            const correctCount = floatList.items.len == meshPtr.vertices.items.len * 3;
+
+                            if (!correctCount)
+                                break;
+
+                            std.debug.assert(meshPtr.vertices.items.len > 0);
+                            std.log.info("-- decoding normals: type: {}, floats: {}, vertices: {}", .{ accessor.component_type, floatList.items.len, meshPtr.vertices.items.len });
+                            std.debug.assert(floatList.items.len == meshPtr.vertices.items.len * 3);
+
+                            for (meshPtr.vertices.items, 0..) |*vertex, i| {
+                                vertex.normal = math.vec3(
+                                    floatList.items[i * 3 + 0],
+                                    floatList.items[i * 3 + 1],
+                                    floatList.items[i * 3 + 2],
+                                );
+                            }
+                        },
+                        .texcoord => |accessor_index| {
+                            const accessor = gltf.data.accessors.items[accessor_index];
+                            gltf.getDataFromBufferView(f32, &floatList, accessor, gltf.glb_binary.?);
+
+                            std.debug.assert(meshPtr.vertices.items.len > 0);
+                            std.debug.assert(floatList.items.len == meshPtr.vertices.items.len * 2);
+
+                            for (meshPtr.vertices.items, 0..) |*vertex, i| {
+                                vertex.uv = math.vec2(
+                                    floatList.items[i * 2 + 0],
+                                    floatList.items[i * 2 + 1],
+                                );
+                            }
+                        },
                         else => {},
                     }
 
@@ -328,7 +366,7 @@ pub fn main() !void {
             }
         }
 
-        std.log.info("### OBJECTS ###", .{});
+        std.log.info("### Nodes ###", .{});
 
         for (gltf.data.nodes.items) |node| {
             if (node.matrix) |matrix| {
