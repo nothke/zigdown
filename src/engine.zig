@@ -563,6 +563,8 @@ pub const Texture = struct {
     buffer: ?[*]u8 = null,
     id: u32 = 0,
 
+    const targetChannels = 4;
+
     const Error = error{
         InvalidPath,
         FailedLoading,
@@ -574,7 +576,7 @@ pub const Texture = struct {
         var channels: c_int = undefined;
 
         c.stbi_set_flip_vertically_on_load(1);
-        const buffer = c.stbi_load(path, &w, &h, &channels, 0);
+        const buffer = c.stbi_load(path, &w, &h, &channels, targetChannels);
 
         if (buffer == null) {
             return Error.FailedLoading;
@@ -593,7 +595,7 @@ pub const Texture = struct {
         var h: i32 = undefined;
         var channels: i32 = undefined;
 
-        const buffer = c.stbi_load_from_memory(img.ptr, @intCast(img.len), &w, &h, &channels, 0);
+        const buffer = c.stbi_load_from_memory(img.ptr, @intCast(img.len), &w, &h, &channels, targetChannels);
 
         if (buffer == null) {
             return Error.FailedLoading;
@@ -623,11 +625,11 @@ pub const Texture = struct {
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,
-            gl.RGB,
+            gl.RGBA,
             self.width,
             self.height,
             0,
-            gl.RGB,
+            gl.RGBA,
             gl.UNSIGNED_BYTE,
             self.buffer,
         );
