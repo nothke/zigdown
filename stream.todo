@@ -119,3 +119,17 @@ Stream 10:
         ☐ Abstract gltf loading with AssetManager
         ☐ Load multiple objects
         ☐ Load Textures from gltf
+
+Stream 11:
+    Before stream:
+        ☐ Got texture loading to work, it was wrong channels
+    On stream:
+        Primitives and Meshes:
+            ☐ Add Primitive struct
+            ☐ Add primitives to mesh
+            ☐ Mesh - model container
+            ☐ Abstract loading to glTF loader
+        ☐ Faces are flipped? Why?
+        ☐ Abstract gltf loading with AssetManager
+        ☐ Load multiple objects
+        ☐ Load Textures from gltf

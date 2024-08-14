@@ -328,7 +328,7 @@ pub fn main() !void {
                                 try meshPtr.vertices.append(.{ .position = math.vec3(
                                     floatList.items[vertexIndex * 3 + 0],
                                     floatList.items[vertexIndex * 3 + 1],
-                                    floatList.items[vertexIndex * 3 + 2],
+                                    -floatList.items[vertexIndex * 3 + 2],
                                 ) });
                             }
                         },
