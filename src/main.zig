@@ -69,11 +69,11 @@ pub fn main() !void {
     var quadMesh = Mesh.init(alloc);
     try Shapes.quad(&quadMesh);
 
-    for (quadMesh.vertices.items) |*v| {
-        v.position = v.position.add(&math.vec3(2, 0, 0));
-    }
+    // for (quadMesh.vertices.items) |*v| {
+    //     v.position = v.position.add(&math.vec3(1, 1, 0));
+    // }
 
-    try Shapes.quad(&quadMesh);
+    //try Shapes.quad(&quadMesh);
 
     try quadMesh.create();
     defer quadMesh.deinit();
@@ -309,6 +309,10 @@ pub fn main() !void {
 
                 std.log.info("  -- primitive {}:", .{pi});
 
+                if (primitive.material) |mi| {
+                    std.log.info("    -- Material: {}", .{mi});
+                }
+
                 for (primitive.attributes.items) |attribute| {
                     switch (attribute) {
                         .position => |accessor_index| {
@@ -351,7 +355,7 @@ pub fn main() !void {
                                 vertex.normal = math.vec3(
                                     floatList.items[i * 3 + 0],
                                     floatList.items[i * 3 + 1],
-                                    floatList.items[i * 3 + 2],
+                                    -floatList.items[i * 3 + 2],
                                 );
                             }
                         },
@@ -371,7 +375,7 @@ pub fn main() !void {
                             for (meshPtr.vertices.items, 0..) |*vertex, i| {
                                 vertex.uv = math.vec2(
                                     floatList.items[i * 2 + 0],
-                                    floatList.items[i * 2 + 1],
+                                    1 - floatList.items[i * 2 + 1],
                                 );
                             }
                         },
@@ -451,7 +455,7 @@ pub fn main() !void {
     //_ = try scene.addObject(&gameMesh, &brickMaterial);
 
     var gltfTexTestObject = try scene.addObject(&quadMesh, &matList.items[0]);
-    gltfTexTestObject.transform.local2world = math.Mat4x4.scaleScalar(10);
+    gltfTexTestObject.transform.local2world = math.Mat4x4.scaleScalar(2).mul(&math.Mat4x4.translate(math.vec3(1, 1, 0)));
 
     var lastFrameTime = glfw.getTime();
 

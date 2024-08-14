@@ -112,17 +112,12 @@ Stream 10:
         ✔ Put all textures in ArrayList @done(24-08-13 02:49)
         ✔ Load zgltf mesh vertices @done(24-08-13 02:50)
         ✘ Load zgltf mesh indices @cancelled(24-08-13 02:50)
-        ☐ Remove cgltf completely
-
-    From last year:
-        ☐ Load a texture
-        ☐ Abstract gltf loading with AssetManager
-        ☐ Load multiple objects
-        ☐ Load Textures from gltf
+        ✘ Remove cgltf completely @cancelled(24-08-14 23:43)
 
 Stream 11:
     Before stream:
-        ☐ Got texture loading to work, it was wrong channels
+        ✔ Got texture loading to work, it was wrong channels @done(24-08-14 23:55)
+        ☐ More glTF debugging
     On stream:
         Primitives and Meshes:
             ☐ Add Primitive struct
@@ -133,3 +128,47 @@ Stream 11:
         ☐ Abstract gltf loading with AssetManager
         ☐ Load multiple objects
         ☐ Load Textures from gltf
+
+
+
+
+
+    zigdown (and Recce engine - Shakedown):
+        - Materials[]
+        - Mesh[]
+
+        - Scene
+            - Objects[]
+                - Transform (model matrix)
+                - *Material
+                - *Mesh
+                    - Vertices[]
+                    - Indices[]
+    
+    zigdown future:
+        - Scene
+            - Objects[]
+                - Transform (model matrix)
+                - *Model
+                    - Primitive
+                        - *Mesh[]
+                            - Vertices[]
+                            - Indices[]
+                        - *Material[]
+
+    glTF:
+        - Materials[]
+        - Mesh[]
+
+        - Scene
+            - Nodes[]
+                - Transform (model matrix)
+                - *Mesh
+                    - Primitives[]
+                        - Vertices[] (attributes)
+                        - Indices[]
+                        - *Material
+                    - Primitives[]
+                        - Vertices[] (attributes)
+                        - Indices[]
+                        - *Material
