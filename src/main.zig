@@ -24,6 +24,25 @@ fn flipZ(v: [3]f32) [3]f32 {
     return .{ v[0], v[1], -v[2] };
 }
 
+const AssetBlock = struct {
+    allocator: std.mem.Allocator,
+
+    meshes: std.ArrayList(Mesh),
+    materials: std.ArrayList(Material),
+
+    fn init(allocator: std.mem.Allocator) AssetBlock {
+        return .{
+            .allocator = allocator,
+            .materials = std.ArrayList(Material).init(allocator),
+            .meshes = std.ArrayList(Mesh).init(allocator),
+        };
+    }
+
+    fn deinit(self: *AssetBlock) void {
+        _ = self; // autofix
+    }
+};
+
 pub fn main() !void {
     var engine = Engine{};
     try engine.init(.{
@@ -36,6 +55,9 @@ pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
     const alloc = gpa.allocator();
+
+    var gltfAssets = AssetBlock.init(alloc);
+    defer gltfAssets.deinit();
 
     var sphereMesh = Mesh.init(alloc);
     defer sphereMesh.deinit();
@@ -107,6 +129,8 @@ pub fn main() !void {
 
     const use_zgltf = true;
 
+    // zgltf assets, must live until the end of the app
+    // TODO: move to AssetBlock
     var texturesList = std.ArrayList(Texture).init(alloc);
     defer texturesList.deinit();
 
@@ -122,7 +146,7 @@ pub fn main() !void {
     var matList = std.ArrayList(Material).init(alloc);
     defer matList.deinit();
 
-    // Old
+    // Old, remove
     var gameMesh = Mesh.init(alloc);
     defer gameMesh.deinit();
 
@@ -220,7 +244,7 @@ pub fn main() !void {
         defer file.close();
 
         // TODO: Check the size of file and set as max bytes
-        const file_buffer = try file.readToEndAllocOptions(std.heap.page_allocator, 1024 * 1024, null, 4, null);
+        const file_buffer = try file.readToEndAllocOptions(std.heap.page_allocator, 1024 * 1024 * 4, null, 4, null);
         defer std.heap.page_allocator.free(file_buffer);
 
         var gltf = zgltf.init(alloc);
@@ -232,11 +256,9 @@ pub fn main() !void {
         gltf.debugPrint();
 
         for (gltf.data.images.items) |image| {
-            const img = image.data.?;
+            const img = image.data.?; // will crash if glb is not used
 
             var tex = try Texture.loadFromBuffer(img);
-            //defer tex.deinit();
-
             tex.log();
 
             try tex.create();
@@ -244,6 +266,7 @@ pub fn main() !void {
             try texturesList.append(tex);
         }
 
+        // Temporary buffers, only used by gltf loader:
         var floatList = std.ArrayList(f32).init(alloc);
         defer floatList.deinit();
 
@@ -266,7 +289,7 @@ pub fn main() !void {
             try mat.addProp("_Color", color);
 
             if (gltfMaterial.metallic_roughness.base_color_texture) |tex| {
-                std.log.info("   - has color texture: {}", .{tex.index});
+                std.log.info("   - has color texture! Index: {}", .{tex.index});
                 try mat.addProp("_Texture", &texturesList.items[tex.index]); // test if has enough..?
             }
 
@@ -425,7 +448,10 @@ pub fn main() !void {
 
     try gameMesh.create();
 
-    _ = try scene.addObject(&gameMesh, &brickMaterial);
+    //_ = try scene.addObject(&gameMesh, &brickMaterial);
+
+    var gltfTexTestObject = try scene.addObject(&quadMesh, &matList.items[0]);
+    gltfTexTestObject.transform.local2world = math.Mat4x4.scaleScalar(10);
 
     var lastFrameTime = glfw.getTime();
 
