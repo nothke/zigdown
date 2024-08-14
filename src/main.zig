@@ -13,6 +13,8 @@ const Vertex = _engine.Vertex;
 const Object = _engine.Object;
 const Texture = _engine.Texture;
 const Material = _engine.Material;
+const Model = _engine.Model;
+const Primitive = _engine.Primitive;
 
 const Color = @import("color.zig");
 
@@ -110,8 +112,11 @@ pub fn main() !void {
 
     const scene = engine.createScene();
 
-    var sphereGO = try scene.addObject(&sphereMesh, &testMaterial);
-    var sphereGO2 = try scene.addObject(&sphereMesh, &brickMaterial);
+    var sphereModel = Model.init(&sphereMesh, &testMaterial);
+    var sphereModel2 = Model.init(&sphereMesh, &brickMaterial);
+
+    var sphereGO = try scene.addObject(&sphereModel);
+    var sphereGO2 = try scene.addObject(&sphereModel2);
 
     // {
     //     var pcg = std.Random.Pcg.init(54);
@@ -133,6 +138,9 @@ pub fn main() !void {
     // TODO: move to AssetBlock
     var texturesList = std.ArrayList(Texture).init(alloc);
     defer texturesList.deinit();
+
+    var modelList = std.ArrayList(Model).init(alloc);
+    defer modelList.deinit();
 
     var meshList = std.ArrayList(Mesh).init(alloc);
     defer meshList.deinit();
@@ -303,14 +311,24 @@ pub fn main() !void {
             std.log.info("", .{});
             std.log.info("Mesh: \"{s}\", primitives count: {}", .{ gltfMesh.name, gltfMesh.primitives.items.len });
 
+            const model = try modelList.addOne();
+            model.primitives = .{};
+
             for (gltfMesh.primitives.items, 0..) |primitive, pi| {
+                const modelPrim = try model.primitives.addOne();
+
                 const meshPtr = try meshList.addOne();
                 meshPtr.* = Mesh.init(alloc);
+
+                modelPrim.mesh = meshPtr;
 
                 std.log.info("  -- primitive {}:", .{pi});
 
                 if (primitive.material) |mi| {
                     std.log.info("    -- Material: {}", .{mi});
+                    modelPrim.material = &matList.items[mi];
+                } else {
+                    modelPrim.material = null;
                 }
 
                 for (primitive.attributes.items) |attribute| {
@@ -414,7 +432,10 @@ pub fn main() !void {
         for (gltf.data.nodes.items) |node| {
             std.log.info("", .{});
 
-            var obj = try scene.addObject(&meshList.items[0], &matList.items[0]);
+            const obj: *Object = if (node.mesh) |mi|
+                try scene.addObject(&modelList.items[mi])
+            else
+                try scene.addEmpty();
 
             if (node.matrix) |matrix| {
                 std.log.info("    - Found matrix!", .{});
@@ -454,7 +475,8 @@ pub fn main() !void {
 
     //_ = try scene.addObject(&gameMesh, &brickMaterial);
 
-    var gltfTexTestObject = try scene.addObject(&quadMesh, &matList.items[0]);
+    var gltfTexTestModel = Model.init(&quadMesh, &matList.items[0]);
+    var gltfTexTestObject = try scene.addObject(&gltfTexTestModel);
     gltfTexTestObject.transform.local2world = math.Mat4x4.scaleScalar(2).mul(&math.Mat4x4.translate(math.vec3(1, 1, 0)));
 
     var lastFrameTime = glfw.getTime();

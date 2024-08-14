@@ -256,12 +256,16 @@ pub const Object = struct {
     model: ?*Model = null,
 
     pub fn render(self: Object) !void {
-        const meshPtr = self.mesh orelse return;
-        const materialPtr = self.material orelse return;
+        if (self.model) |model| {
+            for (model.primitives.slice()) |primitive| {
+                const mesh = primitive.mesh orelse continue;
+                const material = primitive.material orelse continue;
 
-        try materialPtr.bind();
-        try materialPtr.shader.?.setUniformByName("_M", self.transform.local2world);
-        meshPtr.bind();
+                try material.bind();
+                try material.shader.?.setUniformByName("_M", self.transform.local2world);
+                mesh.bind();
+            }
+        }
     }
 };
 
