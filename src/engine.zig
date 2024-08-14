@@ -229,10 +229,31 @@ pub const Transform = struct {
     }
 };
 
-pub const Object = struct {
+pub const Primitive = struct {
     mesh: ?*Mesh = null,
     material: ?*Material = null,
+};
+
+pub const Model = struct {
+    primitives: PrimitivesArray = .{},
+
+    const PrimitivesArray = std.BoundedArray(Primitive, 8);
+
+    pub fn init(mesh: *Mesh, material: *Material) Model {
+        return Model{
+            .primitives = PrimitivesArray.fromSlice(&.{
+                .{
+                    .mesh = mesh,
+                    .material = material,
+                },
+            }) catch unreachable,
+        };
+    }
+};
+
+pub const Object = struct {
     transform: Transform = .{},
+    model: ?*Model = null,
 
     pub fn render(self: Object) !void {
         const meshPtr = self.mesh orelse return;
@@ -258,9 +279,15 @@ pub const Scene = struct {
         // TODO
     }
 
-    pub fn addObject(self: *Scene, mesh: *Mesh, material: *Material) !*Object {
+    pub fn addEmpty(self: *Scene) !*Object {
         const object = try self.objects.addOne();
-        object.* = .{ .mesh = mesh, .material = material };
+        object.* = .{ .model = null };
+        return object;
+    }
+
+    pub fn addObject(self: *Scene, model: *Model) !*Object {
+        const object = try self.objects.addOne();
+        object.* = .{ .model = model };
         return object;
     }
 
