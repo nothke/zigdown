@@ -97,6 +97,14 @@ pub fn main() !void {
     testTex.log();
     try testTex.create();
 
+    var whiteTex = Texture{};
+    var whiteBuffer = [_]u8{255} ** 4 ** 4;
+    whiteTex.buffer = &whiteBuffer;
+    whiteTex.height = 2;
+    whiteTex.width = 2;
+    whiteTex.channels = 4;
+    try whiteTex.create();
+
     var testMaterial = Material{ .shader = &shader };
     try testMaterial.addProp("_Color", Color.white);
     try testMaterial.addProp("_Texture", &testTex);
@@ -299,6 +307,8 @@ pub fn main() !void {
             if (gltfMaterial.metallic_roughness.base_color_texture) |tex| {
                 std.log.info("   - has color texture! Index: {}", .{tex.index});
                 try mat.addProp("_Texture", &texturesList.items[tex.index]); // test if has enough..?
+            } else {
+                try mat.addProp("_Texture", &whiteTex);
             }
 
             try matList.append(mat);
