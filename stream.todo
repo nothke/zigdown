@@ -117,17 +117,17 @@ Stream 10:
 Stream 11:
     Before stream:
         ✔ Got texture loading to work, it was wrong channels @done(24-08-14 23:55)
-        ☐ More glTF debugging
+        ✔ More glTF debugging @done(24-08-15 02:14)
     On stream:
         Primitives and Meshes:
-            ☐ Add Primitive struct
-            ☐ Add primitives to mesh
-            ☐ Mesh - model container
+            ✔ Add Primitive struct @done(24-08-15 02:14)
+            ✔ Add primitives to mesh @done(24-08-15 02:14)
+            ✔ Mesh - model container @done(24-08-15 02:14)
             ☐ Abstract loading to glTF loader
         ☐ Faces are flipped? Why?
         ☐ Abstract gltf loading with AssetManager
-        ☐ Load multiple objects
-        ☐ Load Textures from gltf
+        ✔ Load multiple objects @done(24-08-15 02:14)
+        ✔ Load Textures from gltf @done(24-08-15 02:14)
 
 
 

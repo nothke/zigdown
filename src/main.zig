@@ -465,19 +465,12 @@ pub fn main() !void {
                 std.log.info("    - rotation: {d}", .{node.rotation});
                 std.log.info("    - scale: {d}", .{node.scale});
 
-                // const mesh: *Mesh = &meshList.items[(node.mesh orelse 0)];
-
-                //obj.transform.local2world = math.Mat4x4.ident.mul(&math.Mat4x4.translate(node.translation));
                 const pos: math.Vec3 = .{ .v = node.translation };
-                //const rot: math.Quat = .{ .v = node.rotation };
                 const scl: math.Vec3 = .{ .v = node.scale };
 
                 obj.transform.translate(pos);
-                obj.transform.local2world = obj.transform.local2world.mul(&math.Mat4x4.scale(scl));
-
-                // TODO: Rotation
-                //const rot = math.Quat = .{ .v = node.rotation };
-                //obj.transform.local2world = obj.transform.local2world.
+                //obj.transform.rotate(rot); // TODO: rotation to matrix
+                obj.transform.scale(scl);
             }
         }
     }

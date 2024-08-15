@@ -227,6 +227,10 @@ pub const Transform = struct {
     pub fn translate(self: *Transform, vec: Vec3) void {
         self.local2world = self.local2world.mul(&Mat4x4.translate(vec));
     }
+
+    pub fn scale(self: *Transform, vec: Vec3) void {
+        self.local2world = self.local2world.mul(&Mat4x4.scale(vec));
+    }
 };
 
 pub const Primitive = struct {
