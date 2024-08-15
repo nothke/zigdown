@@ -97,12 +97,13 @@ pub fn main() !void {
     testTex.log();
     try testTex.create();
 
-    var whiteTex = Texture{};
     var whiteBuffer = [_]u8{255} ** 4 ** 4;
-    whiteTex.buffer = &whiteBuffer;
-    whiteTex.height = 2;
-    whiteTex.width = 2;
-    whiteTex.channels = 4;
+    var whiteTex = Texture{
+        .buffer = &whiteBuffer,
+        .height = 2,
+        .width = 2,
+        .channels = 4,
+    };
     try whiteTex.create();
 
     var testMaterial = Material{ .shader = &shader };
