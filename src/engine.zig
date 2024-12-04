@@ -228,6 +228,40 @@ pub const Transform = struct {
         self.local2world = self.local2world.mul(&Mat4x4.translate(vec));
     }
 
+    pub fn rotate(self: *Transform, quat: math.Quat) void {
+        const qx = -quat.v.v[0];
+        const qy = quat.v.v[1];
+        const qz = quat.v.v[2];
+        const qw = quat.v.v[3];
+
+        // From glm: https://github.com/g-truc/glm/blob/33b4a621a697a305bc3a7610d290677b96beb181/glm/gtc/quaternion.inl#L47
+        const rotMat = math.Mat4x4{
+            .v = [4]math.Vec4{
+                math.vec4(
+                    1 - 2 * (qy * qy + qz * qz),
+                    2 * (qx * qy + qz * qw),
+                    2 * (qx * qz - qy * qw),
+                    0,
+                ),
+                math.vec4(
+                    2 * (qx * qy - qz * qw),
+                    1 - 2 * (qx * qx + qz * qz),
+                    2 * (qy * qz + qx * qw),
+                    0,
+                ),
+                math.vec4(
+                    2 * (qx * qz + qy * qw),
+                    2 * (qy * qz - qx * qw),
+                    1 - 2 * (qx * qx + qy * qy),
+                    0,
+                ),
+                math.vec4(0.0, 0.0, 0.0, 1.0),
+            },
+        };
+
+        self.local2world = self.local2world.mul(&rotMat);
+    }
+
     pub fn scale(self: *Transform, vec: Vec3) void {
         self.local2world = self.local2world.mul(&Mat4x4.scale(vec));
     }
