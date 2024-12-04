@@ -22,6 +22,8 @@ const math = _engine.math;
 
 const Shapes = @import("shapes.zig");
 
+//https://github.com/g-truc/glm/blob/33b4a621a697a305bc3a7610d290677b96beb181/glm/gtc/quaternion.inl#L47
+
 fn flipZ(v: [3]f32) [3]f32 {
     return .{ v[0], v[1], -v[2] };
 }
@@ -467,9 +469,26 @@ pub fn main() !void {
 
                 const pos: math.Vec3 = .{ .v = node.translation };
                 const scl: math.Vec3 = .{ .v = node.scale };
+                const rotS: math.Quat = .{ .v = .{ .v = node.rotation } };
+
+                const rot = rotS;
+
+                //rot = rot.normalize();
+
+                const qx = rot.v.v[0];
+                const qy = rot.v.v[1];
+                const qz = rot.v.v[2];
+                const qw = rot.v.v[3];
+
+                const rotMat = math.Mat4x4{ .v = [4]math.Vec4{
+                    math.vec4(1.0 - 2.0 * qy * qy - 2.0 * qz * qz, 2.0 * qx * qy - 2.0 * qz * qw, 2.0 * qx * qz + 2.0 * qy * qw, 0.0),
+                    math.vec4(2.0 * qx * qy + 2.0 * qz * qw, 1.0 - 2.0 * qx * qx - 2.0 * qz * qz, 2.0 * qy * qz - 2.0 * qx * qw, 0.0),
+                    math.vec4(2.0 * qx * qz - 2.0 * qy * qw, 2.0 * qy * qz + 2.0 * qx * qw, 1.0 - 2.0 * qx * qx - 2.0 * qy * qy, 0.0),
+                    math.vec4(0.0, 0.0, 0.0, 1.0),
+                } };
 
                 obj.transform.translate(pos);
-                //obj.transform.rotate(rot); // TODO: rotation to matrix
+                obj.transform.local2world = obj.transform.local2world.mul(&rotMat);
                 obj.transform.scale(scl);
             }
         }
