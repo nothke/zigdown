@@ -480,6 +480,84 @@ pub fn Mat4x4(
             return p;
         }
 
+        pub inline fn perspectiveRH_ZO(
+            /// The field of view angle in the y direction, in radians.
+            fovy: f32,
+            /// The aspect ratio of the viewport's width to its height.
+            aspect: f32,
+            /// The depth (z coordinate) of the near clipping plane.
+            near: f32,
+            /// The depth (z coordinate) of the far clipping plane.
+            far: f32,
+        ) Matrix {
+            const tanHalfFovy: f32 = @tan(fovy / 2.0);
+
+            const r00: f32 = 1.0 / (aspect * tanHalfFovy);
+            const r11: f32 = 1.0 / (tanHalfFovy);
+            const r22: f32 = far / (near - far);
+            const r23: f32 = -1;
+            const r32: f32 = -(far * near) / (far - near);
+
+            return init(
+                &RowVec.init(r00, 0, 0, 0),
+                &RowVec.init(0, r11, 0, 0),
+                &RowVec.init(0, 0, r22, r23),
+                &RowVec.init(0, 0, r32, 0),
+            );
+        }
+
+        pub inline fn perspectiveRH_NO(
+            /// The field of view angle in the y direction, in radians.
+            fovy: f32,
+            /// The aspect ratio of the viewport's width to its height.
+            aspect: f32,
+            /// The depth (z coordinate) of the near clipping plane.
+            near: f32,
+            /// The depth (z coordinate) of the far clipping plane.
+            far: f32,
+        ) Matrix {
+            const tanHalfFovy: f32 = @tan(fovy / 2.0);
+
+            const r00: f32 = 1.0 / (aspect * tanHalfFovy);
+            const r11: f32 = 1.0 / tanHalfFovy;
+            const r22: f32 = (far + near) / (far - near);
+            const r23: f32 = -1;
+            const r32: f32 = -(2.0 * far * near) / (far - near);
+
+            return init(
+                &RowVec.init(r00, 0, 0, 0),
+                &RowVec.init(0, r11, 0, 0),
+                &RowVec.init(0, 0, r22, r23),
+                &RowVec.init(0, 0, r32, 0),
+            );
+        }
+
+        pub inline fn perspectiveLH_NO(
+            /// The field of view angle in the y direction, in radians.
+            fovy: f32,
+            /// The aspect ratio of the viewport's width to its height.
+            aspect: f32,
+            /// The depth (z coordinate) of the near clipping plane.
+            near: f32,
+            /// The depth (z coordinate) of the far clipping plane.
+            far: f32,
+        ) Matrix {
+            const tanHalfFovy: f32 = @tan(fovy / 2.0);
+
+            const r00: f32 = 1.0 / (aspect * tanHalfFovy);
+            const r11: f32 = 1.0 / tanHalfFovy;
+            const r22: f32 = (far + near) / (far - near);
+            const r23: f32 = 1;
+            const r32: f32 = -(2.0 * far * near) / (far - near);
+
+            return init(
+                &RowVec.init(r00, 0, 0, 0),
+                &RowVec.init(0, r11, 0, 0),
+                &RowVec.init(0, 0, r22, r23),
+                &RowVec.init(0, 0, r32, 0),
+            );
+        }
+
         // Note, this is a "wrong" implementation of projection matrix that has been removed from math
 
         /// Constructs a perspective projection matrix; a perspective transformation matrix

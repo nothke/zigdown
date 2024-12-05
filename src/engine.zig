@@ -91,6 +91,15 @@ pub const Engine = struct {
         self.camera.engine = self;
         self.camera.updateProjectionMatrix();
 
+        self.camera.projectionMatrix = math.Mat4x4.projection2D(.{
+            .left = -5 * self.camera.aspectRatio,
+            .right = 5 * self.camera.aspectRatio,
+            .bottom = -5,
+            .top = 5,
+            .near = 0.01,
+            .far = 1000,
+        });
+
         self.input.engine = self;
         self.input.keyEvents = try std.BoundedArray(Input.Event, 16).init(0);
 
@@ -212,7 +221,7 @@ pub const Camera = struct {
         const size = self.engine.window.?.getSize();
         self.aspectRatio = @as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(size.height));
 
-        self.projectionMatrix = Mat4x4.perspective(
+        self.projectionMatrix = Mat4x4.perspectiveRH_NO(
             math.degreesToRadians(self.fov),
             self.aspectRatio,
             self.nearPlane,
@@ -229,7 +238,7 @@ pub const Transform = struct {
     }
 
     pub fn rotate(self: *Transform, quat: math.Quat) void {
-        const qx = -quat.v.v[0];
+        const qx = quat.v.v[0]; // -
         const qy = quat.v.v[1];
         const qz = quat.v.v[2];
         const qw = quat.v.v[3];

@@ -212,13 +212,13 @@ pub fn main() !void {
                         const vertData = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
                         for (0..vertexCount) |vi| {
                             //std.log.info("vec: {d:.2}", .{vertData[vi]});
-                            gameMesh.vertices.items[vi].position = .{ .v = flipZ(vertData[vi]) };
+                            gameMesh.vertices.items[vi].position = .{ .v = vertData[vi] };
                         }
                     } else if (attribute.type == .normal) {
                         const vertData = @as([*]const [3]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
                         for (0..vertexCount) |vi| {
                             //std.log.info("vec: {d:.2}", .{vertData[vi]});
-                            gameMesh.vertices.items[vi].normal = .{ .v = flipZ(vertData[vi]) };
+                            gameMesh.vertices.items[vi].normal = .{ .v = vertData[vi] };
                         }
                     } else if (attribute.type == .texcoord) {
                         const vertData = @as([*]const [2]f32, @ptrCast(@alignCast(data_addr)))[0..vertexCount];
@@ -293,6 +293,7 @@ pub fn main() !void {
         std.log.info("", .{});
         std.log.info("# Materials", .{});
 
+        // #MATERIAL
         for (gltf.data.materials.items) |gltfMaterial| {
             std.log.info("", .{});
             std.log.info("Material: \"{s}\"", .{gltfMaterial.name});
@@ -315,6 +316,7 @@ pub fn main() !void {
             try matList.append(mat);
         }
 
+        // #MESH
         std.log.info("", .{});
         std.log.info("# Meshes", .{});
 
@@ -361,7 +363,7 @@ pub fn main() !void {
                                 try meshPtr.vertices.append(.{ .position = math.vec3(
                                     floatList.items[vertexIndex * 3 + 0],
                                     floatList.items[vertexIndex * 3 + 1],
-                                    -floatList.items[vertexIndex * 3 + 2],
+                                    floatList.items[vertexIndex * 3 + 2],
                                 ) });
                             }
                         },
@@ -384,7 +386,7 @@ pub fn main() !void {
                                 vertex.normal = math.vec3(
                                     floatList.items[i * 3 + 0],
                                     floatList.items[i * 3 + 1],
-                                    -floatList.items[i * 3 + 2],
+                                    floatList.items[i * 3 + 2],
                                 );
                             }
                         },
@@ -437,6 +439,7 @@ pub fn main() !void {
             }
         }
 
+        // #NODES #OBJECTS
         std.log.info("", .{});
         std.log.info("# Nodes", .{});
 
@@ -465,13 +468,23 @@ pub fn main() !void {
                 std.log.info("    - rotation: {d}", .{node.rotation});
                 std.log.info("    - scale: {d}", .{node.scale});
 
-                const pos: math.Vec3 = .{ .v = node.translation };
-                const scl: math.Vec3 = .{ .v = node.scale };
-                const rot: math.Quat = .{ .v = .{ .v = node.rotation } };
+                // const pos: math.Vec3 = .{ .v = node.translation };
+                // const scl: math.Vec3 = .{ .v = node.scale };
+                // const rot: math.Quat = .{ .v = .{ .v = node.rotation } };
 
-                obj.transform.translate(pos);
-                obj.transform.rotate(rot);
-                obj.transform.scale(scl);
+                // obj.transform.translate(pos);
+                // obj.transform.rotate(rot);
+                // obj.transform.scale(scl);
+
+                const trs = zgltf.getGlobalTransform(&gltf.data, node);
+                obj.transform.local2world = math.mat4x4(
+                    &math.Vec4{ .v = trs[0] },
+                    &math.Vec4{ .v = trs[1] },
+                    &math.Vec4{ .v = trs[2] },
+                    &math.Vec4{ .v = trs[3] },
+                );
+
+                obj.transform.local2world = obj.transform.local2world.transpose();
             }
         }
     }
@@ -509,6 +522,14 @@ pub fn main() !void {
             engine.camera.updateProjectionMatrix();
         } else if (engine.input.keyPressed(.x)) {
             engine.camera.nearPlane -= 0.01;
+            engine.camera.updateProjectionMatrix();
+        }
+
+        if (engine.input.keyPressed(.equal)) {
+            engine.camera.fov += 0.1;
+            engine.camera.updateProjectionMatrix();
+        } else if (engine.input.keyPressed(.minus)) {
+            engine.camera.fov -= 0.1;
             engine.camera.updateProjectionMatrix();
         }
 
