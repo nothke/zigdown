@@ -123,13 +123,14 @@ Stream 11:
             ✔ Add Primitive struct @done(24-08-15 02:14)
             ✔ Add primitives to mesh @done(24-08-15 02:14)
             ✔ Mesh - model container @done(24-08-15 02:14)
-            ☐ Abstract loading to glTF loader
-        ☐ Faces are flipped? Why?
-        ☐ Abstract gltf loading with AssetManager
+        ✔ Faces are flipped? Why? @done(24-08-15 02:28)
         ✔ Load multiple objects @done(24-08-15 02:14)
         ✔ Load Textures from gltf @done(24-08-15 02:14)
 
 
+Stream 12:
+    ☐ Abstract loading to glTF loader
+    ☐ Abstract gltf loading with AssetManager/Blocks
 
 
 
