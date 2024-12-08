@@ -62,8 +62,8 @@ pub fn sphere(mesh: *Mesh, radialSegments: i32, verticalSegments: i32, radius: f
             const v3 = v1 + (radSegs + 1);
 
             try mesh.indices.appendSlice(&.{
-                v0, v1, v2,
-                v1, v3, v2,
+                v1, v0, v2,
+                v3, v1, v2,
             });
         }
     }
@@ -75,7 +75,7 @@ pub fn quad(mesh: *Mesh) !void {
 
     const i: u32 = @intCast(mesh.vertices.items.len);
 
-    const norm = math.vec3(0, 0, -1);
+    const norm = math.vec3(0, 0, 1);
 
     try mesh.vertices.appendSlice(&.{
         .{ .position = v3(0, 0, 0), .uv = v2(0, 0), .normal = norm },
