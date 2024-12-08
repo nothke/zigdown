@@ -521,7 +521,7 @@ pub fn Mat4x4(
             const r00: f32 = 1.0 / (aspect * tanHalfFovy);
             const r11: f32 = 1.0 / tanHalfFovy;
             const r22: f32 = (far + near) / (far - near);
-            const r23: f32 = -1;
+            const r23: f32 = -1.0;
             const r32: f32 = -(2.0 * far * near) / (far - near);
 
             return init(

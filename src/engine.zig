@@ -107,8 +107,8 @@ pub const Engine = struct {
 
         glfw.swapInterval(if (windowProps.vsync) 1 else 0);
 
-        gl.enable(gl.DEPTH_TEST);
         gl.enable(gl.CULL_FACE);
+        gl.enable(gl.DEPTH_TEST);
     }
 
     pub fn deinit(self: *Self) void {
@@ -210,8 +210,8 @@ pub const Camera = struct {
     projectionMatrix: Mat4x4 = ident,
     viewMatrix: Mat4x4 = ident,
 
-    nearPlane: f32 = -1,
-    farPlane: f32 = 1,
+    nearPlane: f32 = 1,
+    farPlane: f32 = 10,
     fov: f32 = 75,
     aspectRatio: f32 = 1,
 
@@ -221,7 +221,7 @@ pub const Camera = struct {
         const size = self.engine.window.?.getSize();
         self.aspectRatio = @as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(size.height));
 
-        self.projectionMatrix = Mat4x4.perspectiveRH_NO(
+        self.projectionMatrix = Mat4x4.perspective(
             math.degreesToRadians(self.fov),
             self.aspectRatio,
             self.nearPlane,

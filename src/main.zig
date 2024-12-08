@@ -115,7 +115,7 @@ pub fn main() !void {
     try brickMaterial.addProp("_Texture", &brickTex);
 
     var motion = math.vec3(0, 0, 0);
-    var camOffset = math.vec3(4, 0, 10);
+    var camOffset = math.vec3(0, 0, -10);
 
     var wireframe = false;
 
@@ -257,6 +257,7 @@ pub fn main() !void {
     } else { // Uses zgltf
         std.log.info("###### zGLTF ######\n", .{});
 
+        //var file = try std.fs.cwd().openFile("res/tsubasa_body_only.glb", .{});
         var file = try std.fs.cwd().openFile("res/testcubes.glb", .{});
         defer file.close();
 
@@ -564,6 +565,8 @@ pub fn main() !void {
         // }
 
         try scene.render();
+
+        std.log.info("cam: {d:.2}, {d:.2}", .{engine.camera.fov, engine.camera.nearPlane});
     }
 }
 
