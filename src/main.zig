@@ -154,6 +154,11 @@ pub fn main() !void {
     var meshList = std.ArrayList(Mesh).init(alloc);
     defer meshList.deinit();
 
+    // Set as "no material"
+    var blankMat = Material{.shader = &shader};
+    try blankMat.addProp("_Color", Color.white);
+    try blankMat.addProp("_Texture", &whiteTex);
+
     defer {
         for (meshList.items) |mesh| {
             mesh.deinit();
@@ -342,7 +347,7 @@ pub fn main() !void {
                     std.log.info("    -- Material: {}", .{mi});
                     modelPrim.material = &matList.items[mi];
                 } else {
-                    modelPrim.material = null;
+                    modelPrim.material = &blankMat;
                 }
 
                 for (primitive.attributes.items) |attribute| {

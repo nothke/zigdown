@@ -221,7 +221,7 @@ pub const Camera = struct {
         const size = self.engine.window.?.getSize();
         self.aspectRatio = @as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(size.height));
 
-        self.projectionMatrix = Mat4x4.perspective(
+        self.projectionMatrix = Mat4x4.perspectiveRH_NO(
             math.degreesToRadians(self.fov),
             self.aspectRatio,
             self.nearPlane,
