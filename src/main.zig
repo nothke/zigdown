@@ -155,7 +155,7 @@ pub fn main() !void {
     defer meshList.deinit();
 
     // Set as "no material"
-    var blankMat = Material{.shader = &shader};
+    var blankMat = Material{ .shader = &shader };
     try blankMat.addProp("_Color", Color.white);
     try blankMat.addProp("_Texture", &whiteTex);
 
@@ -512,15 +512,21 @@ pub fn main() !void {
         const speed = dt * 10;
 
         if (engine.input.keyPressed(.w)) {
-            camOffset.v[2] -= speed;
-        } else if (engine.input.keyPressed(.s)) {
             camOffset.v[2] += speed;
+        } else if (engine.input.keyPressed(.s)) {
+            camOffset.v[2] -= speed;
         }
 
         if (engine.input.keyPressed(.a)) {
             camOffset.v[0] += speed;
         } else if (engine.input.keyPressed(.d)) {
             camOffset.v[0] -= speed;
+        }
+
+        if (engine.input.keyPressed(.q)) {
+            camOffset.v[1] -= speed;
+        } else if (engine.input.keyPressed(.e)) {
+            camOffset.v[1] += speed;
         }
 
         if (engine.input.keyPressed(.c)) {
@@ -539,7 +545,7 @@ pub fn main() !void {
             engine.camera.updateProjectionMatrix();
         }
 
-        if (engine.input.keyDown(.q)) {
+        if (engine.input.keyDown(.f)) {
             wireframe = !wireframe;
             Engine.setWireframe(wireframe);
         }
@@ -559,6 +565,12 @@ pub fn main() !void {
         sphereGO.transform.local2world = modelMatrix;
         sphereGO2.transform.local2world = modelMatrix.mul(&math.Mat4x4.translate(math.vec3(5, 2, 0)));
 
+        const eul = math.Quat.fromEuler(0, 0.1, 0);
+
+        var spinny = &scene.objects.buffer[4];
+        spinny.transform.rotate(eul);
+        //spinny.transform.translate(math.vec3(0, 0, 0.1));
+
         // for (engine.scene.?.objects.slice()) |*object| {
         //     const xMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
         //     const yMotion = std.math.lerp(-1, 1, pcg.random().float(f32)) * 0.1;
@@ -570,8 +582,6 @@ pub fn main() !void {
         // }
 
         try scene.render();
-
-        std.log.info("cam: {d:.2}, {d:.2}", .{engine.camera.fov, engine.camera.nearPlane});
     }
 }
 

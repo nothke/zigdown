@@ -91,14 +91,14 @@ pub const Engine = struct {
         self.camera.engine = self;
         self.camera.updateProjectionMatrix();
 
-        self.camera.projectionMatrix = math.Mat4x4.projection2D(.{
-            .left = -5 * self.camera.aspectRatio,
-            .right = 5 * self.camera.aspectRatio,
-            .bottom = -5,
-            .top = 5,
-            .near = 0.01,
-            .far = 1000,
-        });
+        // self.camera.projectionMatrix = math.Mat4x4.projection2D(.{
+        //     .left = -5 * self.camera.aspectRatio,
+        //     .right = 5 * self.camera.aspectRatio,
+        //     .bottom = -5,
+        //     .top = 5,
+        //     .near = 0.01,
+        //     .far = 1000,
+        // });
 
         self.input.engine = self;
         self.input.keyEvents = try std.BoundedArray(Input.Event, 16).init(0);
@@ -210,9 +210,9 @@ pub const Camera = struct {
     projectionMatrix: Mat4x4 = ident,
     viewMatrix: Mat4x4 = ident,
 
-    nearPlane: f32 = 1,
+    nearPlane: f32 = 5,
     farPlane: f32 = 10,
-    fov: f32 = 75,
+    fov: f32 = 5,
     aspectRatio: f32 = 1,
 
     engine: *Engine = undefined,
@@ -221,7 +221,7 @@ pub const Camera = struct {
         const size = self.engine.window.?.getSize();
         self.aspectRatio = @as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(size.height));
 
-        self.projectionMatrix = Mat4x4.perspectiveRH_NO(
+        self.projectionMatrix = Mat4x4.perspectiveRH_ZO(
             math.degreesToRadians(self.fov),
             self.aspectRatio,
             self.nearPlane,
@@ -234,7 +234,7 @@ pub const Transform = struct {
     local2world: Mat4x4 = ident,
 
     pub fn translate(self: *Transform, vec: Vec3) void {
-        self.local2world = self.local2world.mul(&Mat4x4.translate(vec));
+        self.local2world = self.local2world.transpose().mul(&Mat4x4.translate(vec)).transpose();
     }
 
     pub fn rotate(self: *Transform, quat: math.Quat) void {
