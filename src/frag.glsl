@@ -10,7 +10,7 @@ uniform sampler2D _Texture;
 void main()
 {
     vec3 n = out_norm;
-    vec3 l = normalize(vec3(0.5, 0.5, -0.5));
+    vec3 l = normalize(vec3(0.5, -0.5, -0.5));
     float light = -dot(n, l);
 
     vec4 tex = texture(_Texture, out_uv);

@@ -20,6 +20,6 @@ void main()
 {
     vec3 p = pos;
     gl_Position = local2clip(pos);
-    out_norm = norm;
+    out_norm = (_M * vec4(norm, 0.0)).xyz;
     out_uv = uv;
 }
